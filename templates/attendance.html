@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>attendance</title>
+    <link rel="stylesheet" href="/static/just_works.css">
+  </head>
+  <body>
+    <nav>
+        <div class="button">
+        <a href="/">Home</a>
+    </div>
+    </nav>
+    <form method="POST">
+      {% for name in names%}
+      <div>
+        <label>
+          <input type="checkbox" name="name" value="{{name}}" /> {{ name}}
+        </label>
+      </div>
+      {%endfor%}
+
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+</html>
