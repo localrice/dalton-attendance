@@ -1,5 +1,14 @@
 from flask import render_template, request, redirect, url_for, Flask
+from pymongo import MongoClient
+from dotenv import load_dotenv
+import os
+import time
 
+load_dotenv()
+MONGODB_URI = os.environ.get("MONGODB_URI")
+client = MongoClient(MONGODB_URI)
+db = client.dalton
+student_info = db.studentInfo
 
 app = Flask(__name__)
 
@@ -7,7 +16,8 @@ app = Flask(__name__)
 def home():
     return render_template('index.html')
 
-@app.route('/attendance', methods=['GET','POST'])
+
+@app.route('/attendance', methods=['GET', 'POST'])
 def attendance():
     if request.method == 'POST':
         selected_names = request.form.getlist('name')
@@ -15,6 +25,39 @@ def attendance():
     names = ['kevi', 'hated', 'duck', 'neva']
 
     return render_template('attendance.html', names=names)
+
+
+@app.route('/addStudents')
+def add_students():
+    return render_template('add_students.html')
+
+
+@app.route('/data/', methods=['POST', 'GET'])
+def data():
+    if request.method == 'GET':
+        return f"The URL /data is accessed directly. Try going to '/form' to submit form"
+
+    elif request.method == 'POST':
+        form_data = dict(request.form)  # form data from /addStudents
+        streams = {
+            'arts': 'A',
+            'commerce': 'C',
+            'science': 'S'
+        }
+        initial = streams.get(form_data.get('stream'))
+        student_id = initial+str(round(time.time() * 1000))
+        form_data['student_id'] = student_id # add student_id in the form
+        student_info.insert_one(dict(form_data))
+
+        # check if the data is successfully saved
+        result = student_info.find_one({'student_id':student_id})
+        if result:
+            status = True
+        else:
+            status = False
+
+        return render_template('data.html', form_data=form_data, status=status)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
