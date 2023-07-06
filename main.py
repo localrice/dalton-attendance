@@ -2,7 +2,6 @@ from flask import render_template, request, redirect, url_for, Flask
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
-import time
 
 load_dotenv()
 MONGODB_URI = os.environ.get("MONGODB_URI")
@@ -11,6 +10,11 @@ db = client.dalton
 student_info = db.studentInfo
 
 app = Flask(__name__)
+
+def get_initials(string):
+    words = string.split()
+    initials = [word[0].upper() for word in words]
+    return ''.join(initials)
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -39,13 +43,11 @@ def data():
 
     elif request.method == 'POST':
         form_data = dict(request.form)  # form data from /addStudents
-        streams = {
-            'arts': 'A',
-            'commerce': 'C',
-            'science': 'S'
-        }
-        initial = streams.get(form_data.get('stream'))
-        student_id = initial+str(round(time.time() * 1000))
+        
+        stream_initials = get_initials(form_data.get('stream').title())
+        name_initials = get_initials(form_data.get('student name'))
+        student_id = stream_initials + name_initials + form_data.get('year1') + form_data.get('year2') + form_data.get('roll number')
+        print(student_id)
         form_data['student_id'] = student_id # add student_id in the form
         student_info.insert_one(dict(form_data))
 
