@@ -2,7 +2,7 @@ from flask import render_template, request, Flask, g
 import sqlite3
 
 #cursor = conn.cursor()
-DATABASE = 'lmaeo.db'
+DATABASE = 'dalton.db'
 app = Flask(__name__)
 
 def get_initials(string):
