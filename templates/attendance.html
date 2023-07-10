@@ -10,16 +10,16 @@
         <a href="/">Home</a>
     </div>
     </nav>
-    <form method="POST">
-      {% for name in names%}
-      <div>
-        <label>
-          <input type="checkbox" name="name" value="{{name}}" /> {{ name}}
-        </label>
-      </div>
-      {%endfor%}
+    <br>
+    <div class="button">
+      <a href="attendance/stream/science">science</a>
+    </div>
 
-      <button type="submit">Submit</button>
-    </form>
-  </body>
+    <div class="button">
+      <a href="attendance/stream/arts">arts</a>
+    </div>
+    <div class="button">
+      <a href="attendance/stream/commerce"">commerce</a>
+    </div>
+    </body>
 </html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Names Table</title>
+</head>
+<body>
+    <h1>Attendance has been taken for {{stream_name}}.</h1>
+    <table>
+        <thead>
+          <tr>
+            <th>List 1</th>
+            <th>List 2</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in range(max(len(present_students), len(absent_students))) %}
+          <tr>
+            <td>{{ present_students[i] if i < len(present_students) else '' }}</td>
+            <td>{{ absent_students[i] if i < len(absent_students) else '' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+</body>
+</html>

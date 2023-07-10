@@ -34,20 +34,29 @@ def check_student_exists(table_name, student_id):
     else:
         return False
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])    
 def home():
     return render_template('index.html')
 
 
 @app.route('/attendance', methods=['GET', 'POST'])
 def attendance():
+    return render_template('attendance.html')
+
+@app.route('/attendance/stream/<stream_name>',methods=['GET','POST'])
+def stream(stream_name):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('SELECT student_name FROM StudentInfo WHERE stream = ?', ('science',))
+    results = cursor.fetchall()
+    student_names = [result[0] for result in results]
     if request.method == 'POST':
         selected_names = request.form.getlist('name')
         print(selected_names)
-    names = ['kevi', 'hated', 'duck', 'neva']
-
-    return render_template('attendance.html', names=names)
-
+        absent_students = list(set(selected_names) ^ set(student_names))
+        print(absent_students)
+        return render_template('attendance_taken.html', stream_name=stream_name, present_students = selected_names, absent_students = absent_students, len=len,max=max)
+    return render_template('stream_attendance.html',names=student_names)
 
 @app.route('/addStudents')
 def add_students():
