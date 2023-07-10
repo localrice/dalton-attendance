@@ -4,7 +4,7 @@ conn = sqlite3.connect('dalton.db')
 cursor = conn.cursor()
 
 sql = '''
-CREATE TABLE Student (
+CREATE TABLE StudentInfo (
     student_id TEXT PRIMARY KEY, 
     student_name TEXT,
     roll_no INTEGER, 
