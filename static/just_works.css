@@ -29,3 +29,20 @@ body {
 a {
   color: white;
 }
+
+.table-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+table {
+  border-collapse: collapse;
+  border: 2px solid white;
+}
+
+th, td {
+  border: 1px solid white;
+  padding: 8px;
+}
