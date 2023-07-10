@@ -47,7 +47,7 @@ def attendance():
 def stream(stream_name):
     db = get_db()
     cursor = db.cursor()
-    cursor.execute('SELECT student_name FROM StudentInfo WHERE stream = ?', ('science',))
+    cursor.execute('SELECT student_name FROM StudentInfo WHERE stream = ?', (stream_name,))
     results = cursor.fetchall()
     student_names = [result[0] for result in results]
     if request.method == 'POST':
