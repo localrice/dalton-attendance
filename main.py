@@ -1,15 +1,12 @@
 from flask import render_template, request, Flask, g
 import sqlite3
 from werkzeug.datastructures import ImmutableMultiDict
+from utils.check_student_exists import check_student_exists
+from utils.get_initials import get_initials
+from utils.id_generator import id_generator
 
-#cursor = conn.cursor()
 DATABASE = 'dalton.db'
 app = Flask(__name__)
-
-def get_initials(string):
-    words = string.split()
-    initials = [word[0].upper() for word in words]
-    return ''.join(initials)
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -22,18 +19,6 @@ def close_db(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
-
-def check_student_exists(table_name, student_id):
-    db = get_db()
-    cursor = db.cursor()
-
-    sql = f"SELECT 1 FROM {table_name} WHERE student_id = ?"
-    cursor.execute(sql, (student_id,))
-    row = cursor.fetchone()
-    if row is not None:
-        return True
-    else:
-        return False
 
 @app.route('/', methods=['GET', 'POST'])    
 def home():
@@ -82,12 +67,15 @@ def data():
         return f"The URL /data is accessed directly. Try going to '/form' to submit form"
     elif request.method == 'POST':
         form_data = dict(request.form)  # form data from /addStudents
-        
-        stream_initials = get_initials(form_data.get('stream').title())
-        name_initials = get_initials(form_data.get('student name'))
-        student_id = stream_initials + name_initials + form_data.get('year1') + form_data.get('year2') + form_data.get('roll number')
+        stream = form_data.get('stream')
+        roll_no = form_data.get('roll number')
+        student_name = form_data.get('student name')
+        year1 = int(form_data.get('year1'))
+        year2 = int(form_data.get('year2'))
+    
+        student_id = id_generator(stream=stream, roll_number=roll_no, name=student_name, year1=year1, year2=year2)    
         # if student_id doesn't exist yet, creates a column with the given data
-        if check_student_exists(table_name='studentInfo',student_id=student_id) == False:
+        if check_student_exists(db=db,table_name='studentInfo',student_id=student_id) == False:
             sql_insert = "INSERT INTO studentInfo (student_id, student_name, roll_no, stream, academic_year_from, academic_year_to) VALUES (?, ?, ?, ?, ?, ?)"
             data = (student_id, form_data.get('student name'), int(form_data.get('roll number')), form_data.get('stream'),int(form_data.get('year1')), int(form_data.get('year2')))
             cursor.execute(sql_insert, data)
@@ -95,7 +83,7 @@ def data():
         else:
             return render_template('student_already_exists.html')
         # check if the data is successfully saved
-        status = check_student_exists(table_name='studentInfo',student_id=student_id)
+        status = check_student_exists(db=db,table_name='studentInfo',student_id=student_id)
         return render_template('data.html', form_data=form_data, status=status)
 
 
