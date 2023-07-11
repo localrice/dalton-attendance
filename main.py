@@ -1,5 +1,6 @@
 from flask import render_template, request, Flask, g
 import sqlite3
+from werkzeug.datastructures import ImmutableMultiDict
 
 #cursor = conn.cursor()
 DATABASE = 'dalton.db'
@@ -47,16 +48,26 @@ def attendance():
 def stream(stream_name):
     db = get_db()
     cursor = db.cursor()
+
+    # query to get every student's id from the speciefied stream
+    cursor.execute('SELECT student_id FROM StudentInfo WHERE stream = ?', (stream_name,))
+    results = cursor.fetchall()
+    student_id =[result[0] for result in results] #stores all the id of the students present in the stream
+    # query to get every student's name from the speciefied stream
     cursor.execute('SELECT student_name FROM StudentInfo WHERE stream = ?', (stream_name,))
     results = cursor.fetchall()
-    student_names = [result[0] for result in results]
+    student_names = [result[0] for result in results] #stores all the names of the students present in the stream
+
+    # creates a dictionary with the key as student's id and value as student's name
+    student_info = dict(zip(student_id, student_names))
+
     if request.method == 'POST':
-        selected_names = request.form.getlist('name')
-        print(selected_names)
-        absent_students = list(set(selected_names) ^ set(student_names))
-        print(absent_students)
-        return render_template('attendance_taken.html', stream_name=stream_name, present_students = selected_names, absent_students = absent_students, len=len,max=max)
-    return render_template('stream_attendance.html',names=student_names)
+        selected_id = list(request.form.to_dict().keys())
+        absent_student_ids = list(set(selected_id) ^ set(student_id))
+        return render_template('attendance_taken.html', stream_name=stream_name, student_info=student_info,
+                                present_students=selected_id,absent_students = absent_student_ids,
+                                len=len,max=max,str=str)
+    return render_template('stream_attendance.html',student_info=student_info)
 
 @app.route('/addStudents')
 def add_students():
