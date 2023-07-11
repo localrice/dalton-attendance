@@ -16,8 +16,8 @@
         <tbody>
           {% for i in range(max(len(present_students), len(absent_students))) %}
           <tr>
-            <td>{{ present_students[i] if i < len(present_students) else '' }}</td>
-            <td>{{ absent_students[i] if i < len(absent_students) else '' }}</td>
+            <td>{{ student_info[str(present_students[i])] if i < len(present_students) else '' }}</td>
+            <td>{{ student_info[str(absent_students[i])]   if i < len(absent_students) else '' }}</td>
           </tr>
           {% endfor %}
         </tbody>

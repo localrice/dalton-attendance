@@ -11,10 +11,10 @@
     </div>
     </nav>
     <form method="POST">
-      {% for name in names%}
+      {% for key, value in student_info.items()%}
       <div>
         <label>
-          <input type="checkbox" name="name" value="{{name}}" /> {{ name}}
+          <input type="checkbox" name="{{key}}" value="{{value}}" /> {{ value }}
         </label>
       </div>
       {%endfor%}
