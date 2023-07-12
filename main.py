@@ -1,11 +1,11 @@
 from flask import render_template, request, Flask, g
 import sqlite3
-from werkzeug.datastructures import ImmutableMultiDict
+from datetime import datetime
 from utils.check_student_exists import check_student_exists
 from utils.id_generator import id_generator
 from utils.extract_id import extract_roll_number_from_id,remove_number_from_end
 from utils.sort_dict import sort_dict_by_id
-
+from utils.list_string import list_to_string
 DATABASE = 'dalton.db'
 app = Flask(__name__)
 
@@ -50,6 +50,11 @@ def stream(stream_name):
     if request.method == 'POST':
         selected_id = list(request.form.to_dict().keys())
         absent_student_ids = list(set(selected_id) ^ set(student_id))
+        date = datetime.now().date().strftime("%d-%m-%Y")
+        sql_insert = "INSERT INTO dailyAttendance (date, present, absent) VALUES (?, ?, ?)"
+        data = (date,list_to_string(selected_id),list_to_string(absent_student_ids))
+        cursor.execute(sql_insert, data)
+        db.commit()
         return render_template('attendance_taken.html', stream_name=stream_name, student_info=student_info,
                                 present_students=selected_id,absent_students = absent_student_ids,
                                 len=len,max=max,str=str)
