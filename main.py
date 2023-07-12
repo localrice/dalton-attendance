@@ -2,8 +2,9 @@ from flask import render_template, request, Flask, g
 import sqlite3
 from werkzeug.datastructures import ImmutableMultiDict
 from utils.check_student_exists import check_student_exists
-from utils.get_initials import get_initials
 from utils.id_generator import id_generator
+from utils.extract_id import extract_roll_number_from_id,remove_number_from_end
+from utils.sort_dict import sort_dict_by_id
 
 DATABASE = 'dalton.db'
 app = Flask(__name__)
@@ -34,17 +35,17 @@ def stream(stream_name):
     db = get_db()
     cursor = db.cursor()
 
-    # query to get every student's id from the speciefied stream
     cursor.execute('SELECT student_id FROM StudentInfo WHERE stream = ?', (stream_name,))
     results = cursor.fetchall()
-    student_id =[result[0] for result in results] #stores all the id of the students present in the stream
-    # query to get every student's name from the speciefied stream
+    #stores all the id of the students present in the stream without the academic year at the end
+    student_id = [result[0] for result in results]
+
     cursor.execute('SELECT student_name FROM StudentInfo WHERE stream = ?', (stream_name,))
     results = cursor.fetchall()
     student_names = [result[0] for result in results] #stores all the names of the students present in the stream
 
-    # creates a dictionary with the key as student's id and value as student's name
-    student_info = dict(zip(student_id, student_names))
+    # creates a dictionary with the key as student's id and value as student's name arranged in increasing order of the roll number in the student id
+    student_info = sort_dict_by_id(dict(zip(student_id, student_names)))
 
     if request.method == 'POST':
         selected_id = list(request.form.to_dict().keys())
@@ -52,7 +53,7 @@ def stream(stream_name):
         return render_template('attendance_taken.html', stream_name=stream_name, student_info=student_info,
                                 present_students=selected_id,absent_students = absent_student_ids,
                                 len=len,max=max,str=str)
-    return render_template('stream_attendance.html',student_info=student_info)
+    return render_template('stream_attendance.html',student_info=student_info,extract_roll_number_from_id=extract_roll_number_from_id)
 
 @app.route('/addStudents')
 def add_students():
