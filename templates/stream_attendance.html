@@ -14,7 +14,7 @@
       {% for key, value in student_info.items()%}
       <div>
         <label>
-          <input type="checkbox" name="{{key}}" value="{{value}}" /> {{ value }}
+          {{ extract_roll_number_from_id(key) }}<input type="checkbox" name="{{key}}" value="{{value}}" /> {{ value }}
         </label>
       </div>
       {%endfor%}
