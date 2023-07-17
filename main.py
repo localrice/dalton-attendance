@@ -78,12 +78,14 @@ def data():
         student_name = form_data.get('student name')
         year1 = int(form_data.get('year1'))
         year2 = int(form_data.get('year2'))
-    
+        phone_numbers_str = request.form.get('phone_numbers')
+        phone_numbers = phone_numbers_str.split(',') if phone_numbers_str else []
+
         student_id = id_generator(stream=stream, roll_number=roll_no, name=student_name, year1=year1, year2=year2)    
         # if student_id doesn't exist yet, creates a column with the given data
         if check_student_exists(db=db,table_name='studentInfo',student_id=student_id) == False:
-            sql_insert = "INSERT INTO studentInfo (student_id, student_name, roll_no, stream, academic_year_from, academic_year_to) VALUES (?, ?, ?, ?, ?, ?)"
-            data = (student_id, form_data.get('student name'), int(roll_no), stream, year1, year2)
+            sql_insert = "INSERT INTO studentInfo (student_id, student_name, roll_no, stream, phone_numbers, academic_year_from, academic_year_to) VALUES (?, ?, ?, ?, ?, ?, ?)"
+            data = (student_id, form_data.get('student name'), int(roll_no), stream, list_to_string(phone_numbers), year1, year2)
             cursor.execute(sql_insert, data)
             db.commit()
         else:
