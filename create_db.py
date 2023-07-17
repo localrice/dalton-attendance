@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS StudentInfo (
     student_name TEXT,
     roll_no INTEGER, 
     stream TEXT, 
+    phone_number INTEGER,
     academic_year_from INTEGER,
     academic_year_to INTEGER
 )
