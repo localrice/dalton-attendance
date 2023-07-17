@@ -92,6 +92,16 @@ def data():
         status = check_student_exists(db=db,table_name='studentInfo',student_id=student_id)
         return render_template('data.html', form_data=form_data, status=status)
 
+@app.route('/api/attendance/<input_string>')
+def attendance_list(input_string):
+    date_param = request.args.get('date')
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute(f'SELECT {input_string} FROM dailyAttendance WHERE date = ?', (date_param,))
+    results = cursor.fetchall()
+
+    return results
 
 if __name__ == '__main__':
     app.run(debug=True)
