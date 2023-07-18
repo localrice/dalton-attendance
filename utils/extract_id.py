@@ -20,3 +20,18 @@ def extract_roll_number_from_id(student_id):
         return match.group()
     else:
         return None
+def extract_student_details(student_id):
+    stream = student_id[0]  # First letter represents the stream (C, S, or A)
+    # finds the position of the first non-digit character after the stream
+    non_digit_index = next((i for i, char in enumerate(student_id[1:]) if not char.isdigit()), None)
+
+    # Extract the roll number based on the position of the first non-digit character
+    roll_number = int(student_id[1:non_digit_index + 1])
+
+    # Extract the name initials after the roll number
+    name_initials = student_id[non_digit_index + 1:-4]
+
+    # Extract the academic year span (last 4 digits)
+    academic_year_span = student_id[-4:]
+
+    return stream, roll_number, name_initials, academic_year_span
