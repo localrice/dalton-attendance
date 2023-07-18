@@ -9,7 +9,7 @@ def remove_number_from_end(input_string):
     result = re.sub(pattern, '', input_string)
     return result
 
-def extract_roll_number_from_id(student_id):
+def roll_number_from_id(student_id):
     """
     Function that extracts the roll number from the student id
     """
@@ -20,7 +20,7 @@ def extract_roll_number_from_id(student_id):
         return match.group()
     else:
         return None
-def extract_student_details(student_id):
+def student_details(student_id):
     stream = student_id[0]  # First letter represents the stream (C, S, or A)
     # finds the position of the first non-digit character after the stream
     non_digit_index = next((i for i, char in enumerate(student_id[1:]) if not char.isdigit()), None)
