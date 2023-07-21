@@ -100,33 +100,26 @@ def data():
 
 @app.route('/api/attendance/<input_string>')
 def attendance_list(input_string):
-    date_param = request.args.get('date')
+    if request.args.get('date') == 'today':
+            date_param = datetime.now().strftime("%d-%m-%Y")
+            print(date_param)
+    else:
+        date_param = request.args.get('date')
     db = get_db()
     cursor = db.cursor()
-
     cursor.execute(f'SELECT {input_string} FROM dailyAttendance WHERE date = ?', (date_param,))
     results = cursor.fetchall()
 
     return results
-@app.route('/api/phone-number/<input_string>')
-def phone_number_list(input_string):
+@app.route('/api/phone-number/<student_id>')
+def phone_number_list(student_id):
     db = get_db()
     cursor = db.cursor()
-
-    if input_string == 'present' or 'absent':
-        if request.args.get('date') == 'today':
-            date_param = datetime.now().strftime("%d-%m-%Y")
-        else:
-            date_param = request.args.get('date')
-        cursor.execute(f'SELECT {input_string} FROM dailyAttendance WHERE date = ?', (date_param,))
-        ids = cursor.fetchall()
-        cursor.execute('SELECT phone_numbers FROM your_table WHERE id IN ({})'.format(','.join('?' * len(ids))), ids)
-        phone_numbers = cursor.fetchall()
-
-        data_dict = dict(zip(ids, phone_numbers))
-        json_data = json.dumps(data_dict)
-        return json_data
-
+    query = "SELECT phone_numbers FROM studentInfo WHERE student_id = ?"
+    cursor.execute(query, (student_id,))
+    result = cursor.fetchone()
+    phone_numbers_json = json.dumps(result)
+    return phone_numbers_json
 
 if __name__ == '__main__':
     app.run(debug=True)
