@@ -108,9 +108,22 @@ def attendance_list(input_string):
     db = get_db()
     cursor = db.cursor()
     cursor.execute(f'SELECT {input_string} FROM dailyAttendance WHERE date = ?', (date_param,))
-    results = cursor.fetchall()
+    student_ids =  cursor.fetchall()[0][0].split(',') # reduce the nested list to a individual elements
+    print(student_ids)
+    student_phone_dict = {}
+    query = "SELECT student_id, phone_numbers FROM studentInfo WHERE student_id = ?"
 
-    return results
+    # Loop through each student ID and fetch the corresponding phone number
+    for student_id in student_ids:
+        print(student_id)
+        cursor.execute(query, (student_id,))
+        result = cursor.fetchone()
+
+        if result:
+            student_phone_dict[result[0]] = result[1]
+
+    return student_phone_dict
+
 @app.route('/api/phone-number/<student_id>')
 def phone_number_list(student_id):
     db = get_db()
