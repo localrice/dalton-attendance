@@ -25,3 +25,4 @@ htmlcov/
 .coverage.*
 *,cover
 dalton-env
+node_modules
