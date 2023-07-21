@@ -2,19 +2,23 @@
 <html>
   <head>
     <title>attendance</title>
-    <link rel="stylesheet" href="/static/just_works.css">
+    <link rel="stylesheet" href="/static/just_works.css" />
   </head>
   <body>
     <nav>
-        <div class="button">
+      <div class="button">
         <a href="/">Home</a>
-    </div>
+      </div>
     </nav>
     <form method="POST">
       {% for key, value in student_info.items()%}
       <div>
         <label>
-          {{ roll_number_from_id(key) }}<input type="checkbox" name="{{key}}" value="{{value}}" /> {{ value }}
+          {{ roll_number_from_id(key) }}<input
+            type="checkbox"
+            name="{{key}}"
+            value="{{value}}" />
+          {{ value }}
         </label>
       </div>
       {%endfor%}

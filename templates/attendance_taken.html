@@ -1,26 +1,32 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Names Table</title>
-    <link rel="stylesheet" href="/static/just_works.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/static/output.css" />
+  </head>
+  <body>
     <h1>Attendance has been taken for {{stream_name}}.</h1>
     <table>
-        <thead>
-          <tr>
-            <th>Present:</th>
-            <th>Absent:</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for i in range(max(len(present_students), len(absent_students))) %}
-          <tr>
-            <td>{{ student_info[str(present_students[i])] if i < len(present_students) else '' }}</td>
-            <td>{{ student_info[str(absent_students[i])]   if i < len(absent_students) else '' }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-</body>
+      <thead>
+        <tr>
+          <th>Present:</th>
+          <th>Absent:</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in range(max(len(present_students), len(absent_students))) %}
+        <tr>
+          <td>
+            {{ student_info[str(present_students[i])] if i <
+            len(present_students) else '' }}
+          </td>
+          <td>
+            {{ student_info[str(absent_students[i])] if i < len(absent_students)
+            else '' }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </body>
 </html>

@@ -1,12 +1,11 @@
 <head>
-    <link rel="stylesheet" href="/static/just_works.css">
+  <link rel="stylesheet" href="/static/just_works.css" />
 </head>
 {% if status %}
 <h1>new student has been added to the database</h1>
-    {% for key,value in form_data.items() %}
-    <h2> {{key}}</h2>
-    <p> {{value}}</p>
-    {% endfor %}
-{% else %}
-    <h1>Erorr while adding information about new student</h1>
+{% for key,value in form_data.items() %}
+<h2>{{key}}</h2>
+<p>{{value}}</p>
+{% endfor %} {% else %}
+<h1>Erorr while adding information about new student</h1>
 {% endif %}
