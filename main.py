@@ -1,3 +1,4 @@
+from os import path, walk
 from flask import render_template, request, Flask, g
 import sqlite3
 from datetime import datetime
@@ -7,7 +8,12 @@ from utils.extract_info import roll_number_from_id,remove_number_from_end
 from utils.sort_dict import sort_dict_by_id
 from utils.list_string import list_to_string
 import json
+
+
+# some configs
+DEBUG = True
 DATABASE = 'dalton.db'
+
 app = Flask(__name__)
 
 def get_db():
@@ -134,5 +140,15 @@ def phone_number_list(student_id):
     phone_numbers_json = json.dumps(result)
     return phone_numbers_json
 
+
+extra_dirs = ['./templates/',]
+extra_files = extra_dirs[:]
+for extra_dir in extra_dirs:
+    for dirname, dirs, files in walk(extra_dir):
+        for filename in files:
+            filename = path.join(dirname, filename)
+            if path.isfile(filename):
+                extra_files.append(filename)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=DEBUG, extra_files=extra_files)
