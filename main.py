@@ -3,9 +3,10 @@ import sqlite3
 from datetime import datetime
 from utils.check_student_exists import check_student_exists
 from utils.id_generator import id_generator
-from utils.extract_id import extract_roll_number_from_id,remove_number_from_end
+from utils.extract_info import roll_number_from_id,remove_number_from_end
 from utils.sort_dict import sort_dict_by_id
 from utils.list_string import list_to_string
+import json
 DATABASE = 'dalton.db'
 app = Flask(__name__)
 
@@ -58,7 +59,7 @@ def stream(stream_name):
         return render_template('attendance_taken.html', stream_name=stream_name, student_info=student_info,
                                 present_students=selected_id,absent_students = absent_student_ids,
                                 len=len,max=max,str=str)
-    return render_template('stream_attendance.html',student_info=student_info,extract_roll_number_from_id=extract_roll_number_from_id)
+    return render_template('stream_attendance.html',student_info=student_info,roll_number_from_id=roll_number_from_id)
 
 @app.route('/addStudents')
 def add_students():
@@ -83,11 +84,14 @@ def data():
 
         student_id = id_generator(stream=stream, roll_number=roll_no, name=student_name, year1=year1, year2=year2)    
         # if student_id doesn't exist yet, creates a column with the given data
-        if check_student_exists(db=db,table_name='studentInfo',student_id=student_id) == False:
+        is_student_found = check_student_exists(db=db,table_name='studentInfo',student_id=student_id)
+        if is_student_found == False:
             sql_insert = "INSERT INTO studentInfo (student_id, student_name, roll_no, stream, phone_numbers, academic_year_from, academic_year_to) VALUES (?, ?, ?, ?, ?, ?, ?)"
             data = (student_id, form_data.get('student name'), int(roll_no), stream, list_to_string(phone_numbers), year1, year2)
             cursor.execute(sql_insert, data)
             db.commit()
+        elif is_student_found == 1:
+            return "Roll no., stream, and academic year matches with another student."
         else:
             return render_template('student_already_exists.html')
         # check if the data is successfully saved
@@ -104,6 +108,25 @@ def attendance_list(input_string):
     results = cursor.fetchall()
 
     return results
+@app.route('/api/phone-number/<input_string>')
+def phone_number_list(input_string):
+    db = get_db()
+    cursor = db.cursor()
+
+    if input_string == 'present' or 'absent':
+        if request.args.get('date') == 'today':
+            date_param = datetime.now().strftime("%d-%m-%Y")
+        else:
+            date_param = request.args.get('date')
+        cursor.execute(f'SELECT {input_string} FROM dailyAttendance WHERE date = ?', (date_param,))
+        ids = cursor.fetchall()
+        cursor.execute('SELECT phone_numbers FROM your_table WHERE id IN ({})'.format(','.join('?' * len(ids))), ids)
+        phone_numbers = cursor.fetchall()
+
+        data_dict = dict(zip(ids, phone_numbers))
+        json_data = json.dumps(data_dict)
+        return json_data
+
 
 if __name__ == '__main__':
     app.run(debug=True)
