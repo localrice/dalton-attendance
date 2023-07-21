@@ -24,3 +24,4 @@ htmlcov/
 .coverage
 .coverage.*
 *,cover
+dalton-env
