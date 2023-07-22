@@ -115,15 +115,12 @@ def attendance_list(input_string):
     cursor = db.cursor()
     cursor.execute(f'SELECT {input_string} FROM dailyAttendance WHERE date = ?', (date_param,))
     result = cursor.fetchall()
-    #student_ids =  cursor.fetchall()[0][0].split(',') # reduce the nested list to a individual elements
-    student_idsa = [id for sublist in result for ids in sublist for id in ids.split(',')]
-    print(student_idsa)
+    student_ids = [id for sublist in result for ids in sublist for id in ids.split(',')] 
     student_phone_dict = {}
     query = "SELECT student_id, phone_numbers FROM studentInfo WHERE student_id = ?"
 
     # Loop through each student ID and fetch the corresponding phone number
-    for student_id in student_idsa:
-        print(student_id)
+    for student_id in student_ids:
         cursor.execute(query, (student_id,))
         result = cursor.fetchone()
 
