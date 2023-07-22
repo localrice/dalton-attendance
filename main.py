@@ -140,6 +140,23 @@ def phone_number_list(student_id):
     phone_numbers_json = json.dumps(result)
     return phone_numbers_json
 
+@app.route('/api/name')
+def student_name():
+    db = get_db()
+    cursor = db.cursor()
+    print(request.args.get('id'))
+    if request.args.get('id'):
+        query = "SELECT student_name FROM studentInfo WHERE student_id = ?"
+        cursor.execute(query,(request.args.get('id'),))
+        result = cursor.fetchone()
+        name = result[0]
+        data_dict = {
+            "name": name
+        }
+        return json.dumps(data_dict)
+    else:
+        return "specifiy a id as the paramter"
+
 
 extra_dirs = ['./templates/',]
 extra_files = extra_dirs[:]
