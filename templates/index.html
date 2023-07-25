@@ -1,21 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html class="dark">
   <head>
-    <title>drl</title>
+    <title>darL</title>
     <link rel="stylesheet" href="/static/output.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
-  <body>
-    <div class="flex">
-      <div class="button">
-        <a href="/attendance">take attendance</a>
+  <body class="bg-gray-100 dark:bg-black">
+    <main
+      class="w-full h-screen flex items-center justify-center flex-col gap-28">
+      <div class="w-full">
+        <h2
+          class="text-7xl tracking-wide lg:text-6xl w-fit m-auto font-extrabold font-sans dark:text-white text-black">
+          DarL
+        </h2>
       </div>
+      <div class="flex gap-4 flex-col lg:flex-row">
+        <a href="/attendance " class="button">
+          <button class="font-sans font-semibold">Take attendance</button>
+        </a>
 
-      <div class="button">
-        <a href="/students">student info</a>
+        <a href="/students " class="button">
+          <button class="font-sans font-semibold">Student info</button>
+        </a>
+        <a href="/addStudents " class="button">
+          <button class="font-sans font-semibold">Add a new student</button>
+        </a>
       </div>
-      <div class="button">
-        <a href="/addStudents">add a new student</a>
-      </div>
-    </div>
+    </main>
   </body>
 </html>
