@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
   <body class="bg-gray-100 dark:bg-black">
+    <div
+      id="blob-bg-object"
+      class="w-96 hidden dark:block h-96 rounded-full aspect-square fixed -translate-x-1/2 -translate-y-1/2 -z-10">
+      <div
+        class="animate-blob-spin w-full h-full blur-[160px] bg-gradient-to-tr from-cyan-500 absolute to-pink-500 opacity-80 bg-white -z-10"></div>
+    </div>
+
     <main
       class="w-full h-screen flex items-center justify-center flex-col gap-28">
       <div class="w-full">
@@ -28,4 +35,16 @@
       </div>
     </main>
   </body>
+  <script>
+    document.onmousemove = (event) => {
+      const blob_obj = document.getElementById('blob-bg-object');
+      blob_obj.animate(
+        {
+          left: `${event.clientX}px`,
+          top: `${event.clientY}px`,
+        },
+        { duration: 4000, fill: 'forwards' }
+      );
+    };
+  </script>
 </html>
