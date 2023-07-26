@@ -104,6 +104,10 @@ def data():
         status = check_student_exists(db=db,table_name='studentInfo',student_id=student_id)
         return render_template('data.html', form_data=form_data, status=status)
 
+@app.route('/students')
+def students():
+    return render_template('students.html')
+
 @app.route('/api/attendance/<input_string>')
 def attendance_list(input_string):
     if request.args.get('date') == 'today':
@@ -156,6 +160,17 @@ def student_name():
     else:
         return "specifiy a id as the paramter"
 
+@app.route('/api/total-students')
+def total_students():
+    db = get_db()
+    cursor = db.cursor()
+    requested_stream = request.args.get('stream')
+    if requested_stream:
+        requested_stream=requested_stream.lower()
+    if requested_stream in ['arts','commerce','science']:
+        return requested_stream
+    else:
+        return "today"
 
 extra_dirs = ['./templates/',]
 extra_files = extra_dirs[:]
