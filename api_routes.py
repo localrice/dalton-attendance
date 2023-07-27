@@ -1,4 +1,4 @@
-from flask import Blueprint, request,g, Flask
+from flask import Blueprint, request, g, Flask
 import sqlite3
 import json
 from datetime import datetime
@@ -8,6 +8,7 @@ DATABASE = 'dalton.db'
 
 api_bp = Blueprint('api', __name__)
 app = Flask(__name__)
+
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -27,62 +28,61 @@ def close_db(exception):
 def attendance_list(input_string):
     if request.args.get('date') == 'today':
         date_param = datetime.now().strftime("%d-%m-%Y")
-        print(date_param)
     else:
         date_param = request.args.get('date')
     db = get_db()
     cursor = db.cursor()
-    print(date_param)
+
     cursor.execute(
         f'SELECT {input_string} FROM dailyAttendance WHERE date = ?', (date_param,))
     result = cursor.fetchall()
-    print(result)
+
+    # might contain blank values
     student_ids = [
         id for sublist in result for ids in sublist for id in ids.split(',')]
-    print(student_ids)
-    student_phone_dict = {}
-    query = "SELECT student_id, phone_numbers FROM studentInfo WHERE student_id = ?"
-
-    # Loop through each student ID and fetch the corresponding phone number
-    for student_id in student_ids:
-        cursor.execute(query, (student_id,))
-        result = cursor.fetchone()
-
-        if result:
-            student_phone_dict[result[0]] = result[1]
-        print(student_id)
-        print(student_phone_dict)
-
-    return student_phone_dict
+    # removes blank values
+    filtered_student_ids = [item for item in student_ids if item.strip()]
+    return filtered_student_ids
 
 
-@api_bp.route('/api/phone-number/<student_id>')
-def phone_number_list(student_id):
+@api_bp.route('/api/phone-number')
+def phone_number_list():
     db = get_db()
     cursor = db.cursor()
-    query = "SELECT phone_numbers FROM studentInfo WHERE student_id = ?"
-    cursor.execute(query, (student_id,))
-    result = cursor.fetchone()
-    phone_numbers_json = json.dumps(result)
-    return phone_numbers_json
+    student_id = request.args.get('id')
+    if student_id:
+        query = 'SELECT phone_numbers FROM studentInfo11 WHERE student_id = ?'
+        cursor.execute(query, (student_id,))
+        result = cursor.fetchone()
+        phone_numbers_json = json.dumps(result)
+        if phone_numbers_json == 'null':
+            query = 'SELECT phone_numbers FROM studentInfo12 WHERE student_id = ?'
+            cursor.execute(query, (student_id,))
+            result = cursor.fetchone()
+            phone_numbers_json = json.dumps(result)
+            return {'id': student_id, 'phone-numbers': phone_numbers_json}
+    else:
+        return {'error': 'id as an argument should be provided'}
 
 
 @api_bp.route('/api/name')
 def student_name():
     db = get_db()
     cursor = db.cursor()
-    print(request.args.get('id'))
-    if request.args.get('id'):
-        query = "SELECT student_name FROM studentInfo WHERE student_id = ?"
-        cursor.execute(query, (request.args.get('id'),))
+    student_id = request.args.get('id')
+    if student_id:
+        query = 'SELECT student_name FROM studentInfo11 WHERE student_id = ?'
+        cursor.execute(query, (student_id,))
         result = cursor.fetchone()
-        name = result[0]
-        data_dict = {
-            "name": name
-        }
-        return json.dumps(data_dict)
+        if json.dumps(result) == 'null':
+            query = 'SELECT student_name FROM studentInfo12 WHERE student_id = ?'
+            cursor.execute(query, (student_id,))
+            result = cursor.fetchone()
+            if json.dumps(result) == 'null':
+                return {'id': student_id, 'name:': 'null'}
+            return {'id': student_id, 'name:': result[0]}
     else:
-        return "specifiy a id as the paramter"
+        return {'error': 'id as an argument should be provided'}
 
 
 @api_bp.route('/api/total-students')
