@@ -8,6 +8,7 @@ from utils.extract_info import roll_number_from_id
 from utils.sort_dict import sort_dict_by_id
 from utils.list_string import list_to_string
 from api_routes import api_bp
+import requests
 
 # some configs
 DEBUG = True
@@ -141,7 +142,10 @@ def data():
 
 @app.route('/students')
 def students():
-    return render_template('students.html')
+    total_students = requests.get('http://localhost/api/total-students?total=true').json()['number_of_students']
+    present_students = len(requests.get('http://localhost/api/attendance/present?date=today').json())
+    percentage = round((present_students / total_students) * 100)
+    return render_template('students.html',percentage=percentage)
 
 
 extra_dirs = ['./templates/',]
