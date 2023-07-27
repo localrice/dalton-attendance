@@ -4,11 +4,10 @@ import sqlite3
 from datetime import datetime
 from utils.check_student_exists import check_student_exists
 from utils.id_generator import id_generator
-from utils.extract_info import roll_number_from_id, remove_number_from_end
+from utils.extract_info import roll_number_from_id
 from utils.sort_dict import sort_dict_by_id
 from utils.list_string import list_to_string
-import json
-
+from api_routes import api_bp
 
 # some configs
 DEBUG = True
@@ -16,6 +15,7 @@ DATABASE = 'dalton.db'
 
 app = Flask(__name__)
 
+app.register_blueprint(api_bp)
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -142,115 +142,6 @@ def data():
 @app.route('/students')
 def students():
     return render_template('students.html')
-
-
-@app.route('/api/attendance/<input_string>')
-def attendance_list(input_string):
-    if request.args.get('date') == 'today':
-        date_param = datetime.now().strftime("%d-%m-%Y")
-        print(date_param)
-    else:
-        date_param = request.args.get('date')
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute(
-        f'SELECT {input_string} FROM dailyAttendance WHERE date = ?', (date_param,))
-    result = cursor.fetchall()
-    student_ids = [
-        id for sublist in result for ids in sublist for id in ids.split(',')]
-    student_phone_dict = {}
-    query = "SELECT student_id, phone_numbers FROM studentInfo WHERE student_id = ?"
-
-    # Loop through each student ID and fetch the corresponding phone number
-    for student_id in student_ids:
-        cursor.execute(query, (student_id,))
-        result = cursor.fetchone()
-
-        if result:
-            student_phone_dict[result[0]] = result[1]
-
-    return student_phone_dict
-
-
-@app.route('/api/phone-number/<student_id>')
-def phone_number_list(student_id):
-    db = get_db()
-    cursor = db.cursor()
-    query = "SELECT phone_numbers FROM studentInfo WHERE student_id = ?"
-    cursor.execute(query, (student_id,))
-    result = cursor.fetchone()
-    phone_numbers_json = json.dumps(result)
-    return phone_numbers_json
-
-
-@app.route('/api/name')
-def student_name():
-    db = get_db()
-    cursor = db.cursor()
-    print(request.args.get('id'))
-    if request.args.get('id'):
-        query = "SELECT student_name FROM studentInfo WHERE student_id = ?"
-        cursor.execute(query, (request.args.get('id'),))
-        result = cursor.fetchone()
-        name = result[0]
-        data_dict = {
-            "name": name
-        }
-        return json.dumps(data_dict)
-    else:
-        return "specifiy a id as the paramter"
-
-
-@app.route('/api/total-students')
-def total_students():
-    db = get_db()
-    cursor = db.cursor()
-    requested_stream = request.args.get('stream')
-    requested_class = request.args.get('class')
-    requested_total = request.args.get('total')
-    available_streams = ['arts', 'commerce', 'science']
-    available_classes = ['11', '12']
-    if requested_stream:
-        requested_stream = requested_stream.lower()
-    if requested_total:
-        requested_total = requested_total.lower()
-    if requested_class:
-        requested_class = requested_class.lower()
-    # when stream is provided (and class too)
-    if requested_stream in available_streams:
-        if requested_class in available_classes:  # when both stream and class are provided as args
-            query = f'SELECT COUNT(*) FROM  StudentInfo{requested_class}  WHERE stream = ?'
-            cursor.execute(query, (requested_stream,))
-            total_rows = cursor.fetchone()[0]
-            return {'stream': requested_stream, 'class': requested_class, 'number_of_students': total_rows}
-        else:  # when only stream is provided
-            total_students = 0
-            for stream_class in available_classes:
-                query = f'SELECT COUNT(*) FROM  StudentInfo{stream_class}  WHERE stream = ?'
-                cursor.execute(query, (requested_stream,))
-                total_rows = cursor.fetchone()[0]
-                total_students = total_students+total_rows
-                print(total_students)
-            return {'stream': requested_stream, 'classes': '11 & 12', 'number_of_students': total_students}
-    elif requested_class in available_classes:  # when only class is provided
-        total_students = 0
-        for stream in available_streams:
-            query = f'SELECT COUNT(*) FROm StudentInfo{requested_class} WHERE stream = ?'
-            cursor.execute(query, (stream,))
-            total_rows = cursor.fetchone()[0]
-            total_students = total_students + total_rows
-        return {'streams': available_streams, 'class': requested_class, 'number_of_students': total_students}
-    elif requested_total == 'true':  # when total=true is requested total number of students is returned back
-        total_students = 0
-        for stream in available_streams:
-            for stream_class in available_classes:
-                query = f'SELECT COUNT(*) FROm StudentInfo{stream_class} WHERE stream = ?'
-                cursor.execute(query, (stream,))
-                total_rows = cursor.fetchone()[0]
-                total_students = total_students + total_rows
-        return {'streams': available_streams, 'classes': available_classes, 'number_of_students': total_students}
-    else:  # read the api docs, if doc ain't available make one yourself
-        return 'quack quack, this api is wack'
 
 
 extra_dirs = ['./templates/',]
