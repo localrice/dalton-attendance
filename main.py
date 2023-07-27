@@ -81,8 +81,8 @@ def stream_attendance(stream_name):
         selected_id = list(request.form.to_dict().keys())
         absent_student_ids = list(set(selected_id) ^ set(student_id))
         date = datetime.now().date().strftime("%d-%m-%Y")
-        sql_insert = "INSERT INTO dailyAttendance (date, present, absent) VALUES (?, ?, ?)"
-        data = (date, list_to_string(selected_id),
+        sql_insert = "INSERT INTO dailyAttendance (date, class, stream, present, absent) VALUES (?, ?, ?, ?, ?)"
+        data = (date, stream_class, stream_name, list_to_string(selected_id),
                 list_to_string(absent_student_ids))
         cursor.execute(sql_insert, data)
         db.commit()
