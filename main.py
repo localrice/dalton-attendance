@@ -4,7 +4,7 @@ import sqlite3
 from datetime import datetime
 from utils.check_student_exists import check_student_exists
 from utils.id_generator import id_generator
-from utils.extract_info import roll_number_from_id,remove_number_from_end
+from utils.extract_info import roll_number_from_id, remove_number_from_end
 from utils.sort_dict import sort_dict_by_id
 from utils.list_string import list_to_string
 import json
@@ -16,11 +16,13 @@ DATABASE = 'dalton.db'
 
 app = Flask(__name__)
 
+
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
         db = g._database = sqlite3.connect(DATABASE)
     return db
+
 
 @app.teardown_appcontext
 def close_db(exception):
@@ -28,7 +30,8 @@ def close_db(exception):
     if db is not None:
         db.close()
 
-@app.route('/', methods=['GET', 'POST'])    
+
+@app.route('/', methods=['GET', 'POST'])
 def home():
     return render_template('index.html')
 
@@ -36,36 +39,40 @@ def home():
 @app.route('/attendance', methods=['GET', 'POST'])
 def attendance():
     url_dict = {
-        '11' : '/attendance/stream?class=11',
-        '12' : '/attendance/stream?class=12'
+        '11': '/attendance/stream?class=11',
+        '12': '/attendance/stream?class=12'
     }
-    return render_template('infinite_button_links.html',url_dict=url_dict)
+    return render_template('infinite_button_links.html', url_dict=url_dict)
+
 
 @app.route('/attendance/stream')
 def stream():
     stream_class = request.args.get('class')
     url_dict = {
-        'science' : f'/attendance/stream/science?class={stream_class}',
-        'commerce' : f'/attendance/stream/commerce?class={stream_class}',
-        'arts' : f'/attendance/stream/arts?class={stream_class}'
+        'science': f'/attendance/stream/science?class={stream_class}',
+        'commerce': f'/attendance/stream/commerce?class={stream_class}',
+        'arts': f'/attendance/stream/arts?class={stream_class}'
     }
-    return render_template('infinite_button_links.html',url_dict=url_dict)
+    return render_template('infinite_button_links.html', url_dict=url_dict)
 
 
-@app.route('/attendance/stream/<stream_name>',methods=['GET','POST'])
+@app.route('/attendance/stream/<stream_name>', methods=['GET', 'POST'])
 def stream_attendance(stream_name):
     db = get_db()
     cursor = db.cursor()
     stream_class = request.args.get('class')
     table_name = f'StudentInfo{stream_class}'
-    cursor.execute(f'SELECT student_id FROM {table_name} WHERE stream = ?', (stream_name,))
+    cursor.execute(
+        f'SELECT student_id FROM {table_name} WHERE stream = ?', (stream_name,))
     results = cursor.fetchall()
-    #stores all the id of the students present in the stream without the academic year at the end
+    # stores all the id of the students present in the stream without the academic year at the end
     student_id = [result[0] for result in results]
 
-    cursor.execute(f'SELECT student_name FROM {table_name} WHERE stream = ?', (stream_name,))
+    cursor.execute(
+        f'SELECT student_name FROM {table_name} WHERE stream = ?', (stream_name,))
     results = cursor.fetchall()
-    student_names = [result[0] for result in results] #stores all the names of the students present in the stream
+    # stores all the names of the students present in the stream
+    student_names = [result[0] for result in results]
 
     # creates a dictionary with the key as student's id and value as student's name arranged in increasing order of the roll number in the student id
     student_info = sort_dict_by_id(dict(zip(student_id, student_names)))
@@ -75,13 +82,15 @@ def stream_attendance(stream_name):
         absent_student_ids = list(set(selected_id) ^ set(student_id))
         date = datetime.now().date().strftime("%d-%m-%Y")
         sql_insert = "INSERT INTO dailyAttendance (date, present, absent) VALUES (?, ?, ?)"
-        data = (date,list_to_string(selected_id),list_to_string(absent_student_ids))
+        data = (date, list_to_string(selected_id),
+                list_to_string(absent_student_ids))
         cursor.execute(sql_insert, data)
         db.commit()
         return render_template('attendance_taken.html', stream_name=stream_name, student_info=student_info,
-                                present_students=selected_id,absent_students = absent_student_ids,
-                                len=len,max=max,str=str)
-    return render_template('stream_attendance.html',student_info=student_info,roll_number_from_id=roll_number_from_id)
+                               present_students=selected_id, absent_students=absent_student_ids,
+                               len=len, max=max, str=str)
+    return render_template('stream_attendance.html', student_info=student_info, roll_number_from_id=roll_number_from_id)
+
 
 @app.route('/add-students')
 def add_students():
@@ -103,17 +112,21 @@ def data():
         year1 = int(form_data.get('year1'))
         year2 = int(form_data.get('year2'))
         phone_numbers_str = request.form.get('phone_numbers')
-        phone_numbers = phone_numbers_str.split(',') if phone_numbers_str else []
-        student_id = id_generator(stream=stream, roll_number=roll_no, name=student_name, year1=year1, year2=year2)    
+        phone_numbers = phone_numbers_str.split(
+            ',') if phone_numbers_str else []
+        student_id = id_generator(
+            stream=stream, roll_number=roll_no, name=student_name, year1=year1, year2=year2)
         # if student_id doesn't exist yet, creates a column with the given data
         if student_class == '11':
             table_name = 'studentInfo11'
         else:
             table_name = 'studentInfo12'
-        is_student_found = check_student_exists(db=db,table_name=table_name,student_id=student_id)
+        is_student_found = check_student_exists(
+            db=db, table_name=table_name, student_id=student_id)
         if is_student_found == False:
             sql_insert = f'INSERT INTO {table_name} (student_id, student_name, roll_no, stream, phone_numbers, academic_year_from, academic_year_to) VALUES (?, ?, ?, ?, ?, ?, ?)'
-            data = (student_id, form_data.get('student name'), int(roll_no), stream, list_to_string(phone_numbers), year1, year2)
+            data = (student_id, form_data.get('student name'), int(
+                roll_no), stream, list_to_string(phone_numbers), year1, year2)
             cursor.execute(sql_insert, data)
             db.commit()
         elif is_student_found == 1:
@@ -121,25 +134,30 @@ def data():
         else:
             return render_template('student_already_exists.html')
         # check if the data is successfully saved
-        status = check_student_exists(db=db,table_name=table_name,student_id=student_id)
+        status = check_student_exists(
+            db=db, table_name=table_name, student_id=student_id)
         return render_template('data.html', form_data=form_data, status=status)
+
 
 @app.route('/students')
 def students():
     return render_template('students.html')
 
+
 @app.route('/api/attendance/<input_string>')
 def attendance_list(input_string):
     if request.args.get('date') == 'today':
-            date_param = datetime.now().strftime("%d-%m-%Y")
-            print(date_param)
+        date_param = datetime.now().strftime("%d-%m-%Y")
+        print(date_param)
     else:
         date_param = request.args.get('date')
     db = get_db()
     cursor = db.cursor()
-    cursor.execute(f'SELECT {input_string} FROM dailyAttendance WHERE date = ?', (date_param,))
+    cursor.execute(
+        f'SELECT {input_string} FROM dailyAttendance WHERE date = ?', (date_param,))
     result = cursor.fetchall()
-    student_ids = [id for sublist in result for ids in sublist for id in ids.split(',')] 
+    student_ids = [
+        id for sublist in result for ids in sublist for id in ids.split(',')]
     student_phone_dict = {}
     query = "SELECT student_id, phone_numbers FROM studentInfo WHERE student_id = ?"
 
@@ -153,6 +171,7 @@ def attendance_list(input_string):
 
     return student_phone_dict
 
+
 @app.route('/api/phone-number/<student_id>')
 def phone_number_list(student_id):
     db = get_db()
@@ -163,6 +182,7 @@ def phone_number_list(student_id):
     phone_numbers_json = json.dumps(result)
     return phone_numbers_json
 
+
 @app.route('/api/name')
 def student_name():
     db = get_db()
@@ -170,7 +190,7 @@ def student_name():
     print(request.args.get('id'))
     if request.args.get('id'):
         query = "SELECT student_name FROM studentInfo WHERE student_id = ?"
-        cursor.execute(query,(request.args.get('id'),))
+        cursor.execute(query, (request.args.get('id'),))
         result = cursor.fetchone()
         name = result[0]
         data_dict = {
@@ -180,6 +200,7 @@ def student_name():
     else:
         return "specifiy a id as the paramter"
 
+
 @app.route('/api/total-students')
 def total_students():
     db = get_db()
@@ -187,47 +208,51 @@ def total_students():
     requested_stream = request.args.get('stream')
     requested_class = request.args.get('class')
     requested_total = request.args.get('total')
-    available_streams = ['arts','commerce','science']
-    available_classes = ['11','12']
+    available_streams = ['arts', 'commerce', 'science']
+    available_classes = ['11', '12']
     if requested_stream:
-        requested_stream=requested_stream.lower()
+        requested_stream = requested_stream.lower()
     if requested_total:
-        requested_total=requested_total.lower()
-
+        requested_total = requested_total.lower()
+    if requested_class:
+        requested_class = requested_class.lower()
+    # when stream is provided (and class too)
     if requested_stream in available_streams:
-        if requested_class in available_classes:
+        if requested_class in available_classes:  # when both stream and class are provided as args
             query = f'SELECT COUNT(*) FROM  StudentInfo{requested_class}  WHERE stream = ?'
-            cursor.execute(query,(requested_stream,))
+            cursor.execute(query, (requested_stream,))
             total_rows = cursor.fetchone()[0]
-            return {'stream':requested_stream, 'class': requested_class, 'number_of_students':total_rows}
-        else:
+            return {'stream': requested_stream, 'class': requested_class, 'number_of_students': total_rows}
+        else:  # when only stream is provided
             total_students = 0
             for stream_class in available_classes:
                 query = f'SELECT COUNT(*) FROM  StudentInfo{stream_class}  WHERE stream = ?'
-                cursor.execute(query,(requested_stream,))
+                cursor.execute(query, (requested_stream,))
                 total_rows = cursor.fetchone()[0]
                 total_students = total_students+total_rows
                 print(total_students)
-            return {'stream':requested_stream, 'classes':'11 & 12','number_of_students':total_students}
-    elif requested_class in available_classes:
+            return {'stream': requested_stream, 'classes': '11 & 12', 'number_of_students': total_students}
+    elif requested_class in available_classes:  # when only class is provided
         total_students = 0
         for stream in available_streams:
             query = f'SELECT COUNT(*) FROm StudentInfo{requested_class} WHERE stream = ?'
-            cursor.execute(query,(stream,))
+            cursor.execute(query, (stream,))
             total_rows = cursor.fetchone()[0]
-            total_students = total_students+ total_rows
-        return {'streams':available_streams,'class': requested_class,'number_of_students':total_students}
-    elif requested_total == 'true':
+            total_students = total_students + total_rows
+        return {'streams': available_streams, 'class': requested_class, 'number_of_students': total_students}
+    elif requested_total == 'true':  # when total=true is requested total number of students is returned back
         total_students = 0
         for stream in available_streams:
             for stream_class in available_classes:
                 query = f'SELECT COUNT(*) FROm StudentInfo{stream_class} WHERE stream = ?'
-                cursor.execute(query,(stream,))
+                cursor.execute(query, (stream,))
                 total_rows = cursor.fetchone()[0]
-                total_students = total_students+ total_rows
-        return {'streams':available_streams,'classes':available_classes,'number_of_students':total_students}
-    else:
+                total_students = total_students + total_rows
+        return {'streams': available_streams, 'classes': available_classes, 'number_of_students': total_students}
+    else:  # read the api docs, if doc ain't available make one yourself
         return 'quack quack, this api is wack'
+
+
 extra_dirs = ['./templates/',]
 extra_files = extra_dirs[:]
 for extra_dir in extra_dirs:
