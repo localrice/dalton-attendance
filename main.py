@@ -35,19 +35,35 @@ def home():
 
 @app.route('/attendance', methods=['GET', 'POST'])
 def attendance():
-    return render_template('attendance.html')
+    url_dict = {
+        '11' : '/attendance/stream?class=11',
+        '12' : '/attendance/stream?class=12'
+    }
+    return render_template('infinite_button_links.html',url_dict=url_dict)
+
+@app.route('/attendance/stream')
+def stream():
+    stream_class = request.args.get('class')
+    url_dict = {
+        'science' : f'/attendance/stream/science?class={stream_class}',
+        'commerce' : f'/attendance/stream/commerce?class={stream_class}',
+        'arts' : f'/attendance/stream/arts?class={stream_class}'
+    }
+    return render_template('infinite_button_links.html',url_dict=url_dict)
+
 
 @app.route('/attendance/stream/<stream_name>',methods=['GET','POST'])
-def stream(stream_name):
+def stream_attendance(stream_name):
     db = get_db()
     cursor = db.cursor()
-
-    cursor.execute('SELECT student_id FROM StudentInfo WHERE stream = ?', (stream_name,))
+    stream_class = request.args.get('class')
+    table_name = f'StudentInfo{stream_class}'
+    cursor.execute(f'SELECT student_id FROM {table_name} WHERE stream = ?', (stream_name,))
     results = cursor.fetchall()
     #stores all the id of the students present in the stream without the academic year at the end
     student_id = [result[0] for result in results]
 
-    cursor.execute('SELECT student_name FROM StudentInfo WHERE stream = ?', (stream_name,))
+    cursor.execute(f'SELECT student_name FROM {table_name} WHERE stream = ?', (stream_name,))
     results = cursor.fetchall()
     student_names = [result[0] for result in results] #stores all the names of the students present in the stream
 
@@ -82,17 +98,21 @@ def data():
         form_data = dict(request.form)  # form data from /addStudents
         stream = form_data.get('stream')
         roll_no = form_data.get('roll number')
+        student_class = form_data.get('class')
         student_name = form_data.get('student name')
         year1 = int(form_data.get('year1'))
         year2 = int(form_data.get('year2'))
         phone_numbers_str = request.form.get('phone_numbers')
         phone_numbers = phone_numbers_str.split(',') if phone_numbers_str else []
-
         student_id = id_generator(stream=stream, roll_number=roll_no, name=student_name, year1=year1, year2=year2)    
         # if student_id doesn't exist yet, creates a column with the given data
-        is_student_found = check_student_exists(db=db,table_name='studentInfo',student_id=student_id)
+        if student_class == '11':
+            table_name = 'studentInfo11'
+        else:
+            table_name = 'studentInfo12'
+        is_student_found = check_student_exists(db=db,table_name=table_name,student_id=student_id)
         if is_student_found == False:
-            sql_insert = "INSERT INTO studentInfo (student_id, student_name, roll_no, stream, phone_numbers, academic_year_from, academic_year_to) VALUES (?, ?, ?, ?, ?, ?, ?)"
+            sql_insert = f'INSERT INTO {table_name} (student_id, student_name, roll_no, stream, phone_numbers, academic_year_from, academic_year_to) VALUES (?, ?, ?, ?, ?, ?, ?)'
             data = (student_id, form_data.get('student name'), int(roll_no), stream, list_to_string(phone_numbers), year1, year2)
             cursor.execute(sql_insert, data)
             db.commit()
@@ -101,7 +121,7 @@ def data():
         else:
             return render_template('student_already_exists.html')
         # check if the data is successfully saved
-        status = check_student_exists(db=db,table_name='studentInfo',student_id=student_id)
+        status = check_student_exists(db=db,table_name=table_name,student_id=student_id)
         return render_template('data.html', form_data=form_data, status=status)
 
 @app.route('/students')
