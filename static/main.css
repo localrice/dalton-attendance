@@ -2,8 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* hide number input spinners */
+/* for chromium */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* for Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
 @layer components {
   .button {
-    @apply w-full whitespace-nowrap hover:shadow-xl hover:shadow-gray-900/30 dark:hover:shadow-xl dark:hover:shadow-gray-200/10 lg:text-base bg-black px-3 py-2 select-none flex text-center justify-center flex-col rounded-md border text-white duration-200 ease-in-out hover:border-black hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:bg-gray-600 disabled:hover:border-white disabled:hover:bg-gray-600 disabled:hover:text-white dark:bg-white dark:text-black dark:hover:border-white dark:hover:bg-transparent dark:hover:text-white dark:disabled:border-gray-400 dark:disabled:bg-gray-400 dark:disabled:text-gray-800 dark:disabled:hover:border-gray-400 dark:disabled:hover:bg-gray-400;
+    @apply w-full mx-auto whitespace-nowrap hover:shadow-xl hover:shadow-gray-900/30 dark:hover:shadow-xl dark:hover:shadow-gray-200/10 lg:text-base bg-black px-3 py-2 select-none flex text-center justify-center flex-col rounded-md border text-white duration-200 ease-in-out hover:border-black hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:bg-gray-600 disabled:hover:border-white disabled:hover:bg-gray-600 disabled:hover:text-white dark:bg-white dark:text-black dark:hover:border-white dark:hover:bg-transparent dark:hover:text-white dark:disabled:border-gray-400 dark:disabled:bg-gray-400 dark:disabled:text-gray-800 dark:disabled:hover:border-gray-400 dark:disabled:hover:bg-gray-400;
+  }
+
+  .input-text {
+    @apply w-full placeholder:text-gray-400 dark:placeholder:text-gray-700 text-lg p-1 pl-2 mt-1 bg-white dark:bg-black border text-black dark:text-white tracking-wide border-gray-400 dark:border-gray-600 dark:focus:border-gray-100 focus:outline-none focus:border-black rounded-md;
   }
 }
