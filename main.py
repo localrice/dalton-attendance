@@ -83,7 +83,7 @@ def stream_attendance(stream_name):
                                 len=len,max=max,str=str)
     return render_template('stream_attendance.html',student_info=student_info,roll_number_from_id=roll_number_from_id)
 
-@app.route('/addStudents')
+@app.route('/add-students')
 def add_students():
     return render_template('add_students.html')
 
