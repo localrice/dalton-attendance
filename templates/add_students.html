@@ -1,45 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html class="">
   <head>
     <link rel="stylesheet" href="/static/output.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
-  <body>
-    <form action="/data" method="POST">
-      <p>Student name <input type="text" name="student name" required /></p>
-      <p>Roll number<input type="text" name="roll number" required /></p>
-      <p>
-        <label for="stream">Choose a stream:</label>
-        <select id="stream" name="stream" required>
-          <option value="arts">Arts</option>
-          <option value="commerce">Commerce</option>
-          <option value="science">Science</option>
-        </select>
-      </p>
+  <body class="bg-gray-100 dark:bg-black">
+    <main class="flex items-center justify-start min-h-screen w-full flex-col">
+      <div class="py-16 px-4">
+        <h4 class="font-sans font-bold text-black dark:text-white text-4xl">
+          Add a new student
+        </h4>
+      </div>
+      <div class="px-4">
+        <form action="/data" class="flex flex-col gap-6" method="POST">
+          <fieldset class="">
+            <p class="text-gray-800 tracking-wide dark:text-gray-300">
+              Student name
+            </p>
+            <input
+              type="text"
+              class="input-text"
+              name="student name"
+              required />
+          </fieldset>
 
-      <p>
-        <label for="class">Choose class</label>
-        <select id="class" name="class" requried>
-          <option value="11">11</option>
-          <option value="12">12</option>
-        </select>
-      </p>
+          <fieldset>
+            <p class="text-gray-800 dark:text-gray-300">Roll number</p>
+            <input type="text" class="input-text" name="roll number" required />
+          </fieldset>
 
-      <p>
-        <label for="phone_numbers"
-          >Enter phone numbers (comma-separated):</label
-        >
-        <input type="text" id="phone_numbers" name="phone_numbers" required />
-      </p>
-      <p>
-        Academic year:<br />
-        <label for="year1">From:</label>
-        <input type="number" id="year1" name="year1" required /><br /><br />
-        <label for="year2">Till:</label>
-        <input type="number" id="year2" name="year2" required /><br /><br />
-      </p>
+          <fieldset>
+            <label for="stream" class="text-gray-800 dark:text-gray-300"
+              >Stream:&nbsp;</label
+            >
+            <select
+              id="stream"
+              class="px-1 py-1 bg-white border border-gray-400 outline-none dark:bg-black dark:border-gray-800 dark:text-white rounded-md"
+              name="stream"
+              required>
+              <option value="science">Science</option>
+              <option value="commerce">Commerce</option>
+              <option value="arts">Arts</option>
+            </select>
+          </fieldset>
 
-      <p><input type="submit" value="submit" /></p>
-    </form>
+          <fieldset>
+            <label for="class" class="text-gray-800 dark:text-gray-300"
+              >Class:&nbsp;</label
+            >
+            <select
+              id="class"
+              name="class"
+              class="px-2 py-1 bg-white border border-gray-400 outline-none dark:bg-black dark:border-gray-800 dark:text-white rounded-md"
+              requried>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          </fieldset>
+
+          <fieldset>
+            <label for="phone_numbers" class="text-gray-800 dark:text-gray-300"
+              >Phone numbers (comma-separated):</label
+            >
+            <input
+              type="text"
+              id="phone_numbers"
+              class="input-text"
+              name="phone_numbers"
+              required />
+          </fieldset>
+
+          <fieldset class="text-gray-800 dark:text-gray-300">
+            <h2 class="text-gray-800 dark:text-gray-300">Academic year</h2>
+            <input
+              type="number"
+              class="input-text w-20 py-[.12rem]"
+              placeholder="2023"
+              id="year1"
+              name="year1"
+              required />
+            <label for="year2"> to </label>
+            <input
+              type="number"
+              placeholder="2024"
+              class="input-text w-20 py-[.12rem]"
+              id="year2"
+              name="year2"
+              required />
+          </fieldset>
+
+          <div class="py-8">
+            <button class="button hover:shadow-sm">Add</button>
+          </div>
+        </form>
+      </div>
+    </main>
   </body>
 </html>
