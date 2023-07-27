@@ -185,13 +185,49 @@ def total_students():
     db = get_db()
     cursor = db.cursor()
     requested_stream = request.args.get('stream')
+    requested_class = request.args.get('class')
+    requested_total = request.args.get('total')
+    available_streams = ['arts','commerce','science']
+    available_classes = ['11','12']
     if requested_stream:
         requested_stream=requested_stream.lower()
-    if requested_stream in ['arts','commerce','science']:
-        return requested_stream
-    else:
-        return "today"
+    if requested_total:
+        requested_total=requested_total.lower()
 
+    if requested_stream in available_streams:
+        if requested_class in available_classes:
+            query = f'SELECT COUNT(*) FROM  StudentInfo{requested_class}  WHERE stream = ?'
+            cursor.execute(query,(requested_stream,))
+            total_rows = cursor.fetchone()[0]
+            return {'stream':requested_stream, 'class': requested_class, 'number_of_students':total_rows}
+        else:
+            total_students = 0
+            for stream_class in available_classes:
+                query = f'SELECT COUNT(*) FROM  StudentInfo{stream_class}  WHERE stream = ?'
+                cursor.execute(query,(requested_stream,))
+                total_rows = cursor.fetchone()[0]
+                total_students = total_students+total_rows
+                print(total_students)
+            return {'stream':requested_stream, 'classes':'11 & 12','number_of_students':total_students}
+    elif requested_class in available_classes:
+        total_students = 0
+        for stream in available_streams:
+            query = f'SELECT COUNT(*) FROm StudentInfo{requested_class} WHERE stream = ?'
+            cursor.execute(query,(stream,))
+            total_rows = cursor.fetchone()[0]
+            total_students = total_students+ total_rows
+        return {'streams':available_streams,'class': requested_class,'number_of_students':total_students}
+    elif requested_total == 'true':
+        total_students = 0
+        for stream in available_streams:
+            for stream_class in available_classes:
+                query = f'SELECT COUNT(*) FROm StudentInfo{stream_class} WHERE stream = ?'
+                cursor.execute(query,(stream,))
+                total_rows = cursor.fetchone()[0]
+                total_students = total_students+ total_rows
+        return {'streams':available_streams,'classes':available_classes,'number_of_students':total_students}
+    else:
+        return 'quack quack, this api is wack'
 extra_dirs = ['./templates/',]
 extra_files = extra_dirs[:]
 for extra_dir in extra_dirs:
