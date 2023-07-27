@@ -34,6 +34,8 @@ conn.commit()
 sql = '''
 CREATE TABLE IF NOT EXISTS dailyAttendance (
     date TEXT,
+    class INTEGER,
+    stream TEXT,
     present TEXT,
     absent TEXT
 )
