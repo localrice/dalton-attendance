@@ -142,8 +142,8 @@ def data():
 
 @app.route('/students')
 def students():
-    total_students = requests.get('http://localhost/api/total-students?total=true').json()['number_of_students']
-    present_students = len(requests.get('http://localhost/api/attendance/present?date=today').json())
+    total_students = requests.get('http://localhost:5000/api/total-students?total=true').json()['number_of_students']
+    present_students = len(requests.get('http://localhost:5000/api/attendance/present?date=today').json())
     percentage = round((present_students / total_students) * 100)
     return render_template('students.html',percentage=percentage)
 
