@@ -86,6 +86,26 @@ def student_name():
     else:
         return {'error': 'id as an argument should be provided'}
 
+@api_bp.route('/api/all-info')
+def student_info():
+    db = get_db()
+    cursor = db.cursor()
+    student_id = request.args.get('id')
+    if student_id:
+        query = 'SELECT * FROM studentInfo11 WHERE student_id = ?'
+        cursor.execute(query, (student_id,))
+        result = cursor.fetchone()
+        if json.dumps(result) == 'null':
+            query = 'SELECT * FROM studentInfo12 WHERE student_id = ?'
+            cursor.execute(query, (student_id,))
+            result = cursor.fetchone()
+            if json.dumps(result) == 'null':
+                return {'id': student_id, 'error':'No student with the ID could be found'}
+            return {'id': result[0], 'name:': result[1],'roll_no':result[2],'stream':result[3],'phone_numbers':result[4],'academic_year_from':result[5],'academic_year_to':result[6]}
+        else:
+            return {'id': result[0], 'name:': result[1],'roll_no':result[2],'stream':result[3],'phone_numbers':result[4],'academic_year_from':result[5],'academic_year_to':result[6]}
+    else:
+        return {'error': 'id as an argument should be provided'}
 
 @api_bp.route('/api/total-students')
 def total_students():
