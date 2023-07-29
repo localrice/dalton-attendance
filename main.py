@@ -92,7 +92,10 @@ def stream_attendance(stream_name):
         return render_template('attendance_taken.html', stream_name=stream_name, student_info=student_info,
                                present_students=selected_id, absent_students=absent_student_ids,
                                len=len, max=max, str=str)
-    return render_template('stream_attendance.html', student_info=student_info, roll_number_from_id=roll_number_from_id)
+    
+    attendance_taken_or_not = requests.get(f'http://localhost:5000/api/attendance-taken-or-not?stream={stream_name}&class={stream_class}').json()['attendance_taken']
+    print(attendance_taken_or_not)
+    return render_template('stream_attendance.html', student_info=student_info, roll_number_from_id=roll_number_from_id,attendance_taken_or_not=attendance_taken_or_not,stream_class=stream_class,stream_name=stream_name)
 
 
 @app.route('/add-students')
