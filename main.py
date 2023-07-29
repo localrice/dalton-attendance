@@ -19,6 +19,7 @@ app = Flask(__name__)
 
 app.register_blueprint(api_bp)
 
+
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
@@ -141,32 +142,44 @@ def data():
         return render_template('data.html', form_data=form_data, status=status)
 
 
-@app.route('/students/',methods=['POST','GET']   )
+@app.route('/students/', methods=['POST', 'GET'])
 def students():
-    total_students = requests.get('http://localhost:5000/api/total-students?total=true').json()['number_of_students']
-    present_students = len(requests.get('http://localhost:5000/api/attendance/present?date=today').json())
+    total_students = requests.get(
+        'http://localhost:5000/api/total-students?total=true').json()['number_of_students']
+    present_students = len(requests.get(
+        'http://localhost:5000/api/attendance/present?date=today').json())
     percentage = round((present_students / total_students) * 100)
-    return render_template('students.html',percentage=percentage)   
+    return render_template('students.html', percentage=percentage)
 
-@app.route('/students/search',methods=['POST','GET'])
+
+@app.route('/students/search', methods=['POST', 'GET'])
 def search():
-    db=get_db()
+    db = get_db()
     cursor = db.cursor()
     if request.method == "POST":
         search_value = request.form.get('search_query')
-        similar_names = fuzzy_search_names(search_value,db=db,table_name='StudentInfo12')
+        similar_names = fuzzy_search_names(
+            search_value, db=db, table_name='StudentInfo12')
         similar_ids = [values for key, values in similar_names.items()]
         list_of_info = []
         for id in similar_ids:
-            student_info = requests.get(f'http://localhost:5000/api/all-info?id={id}').json()
+            student_info = requests.get(
+                f'http://localhost:5000/api/all-info?id={id}').json()
             list_of_info.append(student_info)
         if 'error' in similar_names:
             if similar_names['error'] == 'unsafe searched_name':
-                return 
-            return render_template('students.html',error=f'no student with the name {search_value}')
+                return
+            return render_template('students.html', error=f'no student with the name {search_value}')
         else:
-            print(list_of_info)
-            return render_template('students.html',list_of_info=list_of_info)
+            id_attendance_count_list = []
+
+            for id in similar_ids:
+                attendance_count = requests.get(
+                    f'http://localhost:5000/api/attendance-count?id={id}').json()
+                attendance_count['id'] = id
+                id_attendance_count_list.append(attendance_count)
+            return render_template('students.html', list_of_info=list_of_info, id_attendance_count_list=id_attendance_count_list, enumerate=enumerate, round=round)
+
 
 extra_dirs = ['./templates/',]
 extra_files = extra_dirs[:]
