@@ -22,10 +22,21 @@
         <div>
             {% if list_of_info is defined %}
                 {% for a in list_of_info %}
-                <p>
-                    Name: {{ a['id'] }}
-                </p>
+                <div>
+                    <p><strong>Name:</strong> {{ a['name'] }}</p>
+                    <p><strong>Class:</strong> {{ a['class'] }}</p>
+                    <p><strong>Roll number:</strong> {{ a['roll_no'] }}</p>
+                    <p><strong>Stream:</strong> {{ a['stream'] }}</p>
+                    <p><strong>ID:</strong> {{ a['id'] }}</p>
+                    <p><strong>Academic year:</strong> {{ a['academic_year_from'] }} - {{ a['academic_year_to'] }}</p>
+                </div>
+                <hr>
                 {% endfor %} 
+            {% endif %}
+        </div>
+        <div>
+            {% if error is defined %}
+            <p><strong>{{error}}</strong></p>
             {% endif %}
         </div>
         <div>
