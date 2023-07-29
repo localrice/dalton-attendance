@@ -81,6 +81,8 @@ def student_name():
             if json.dumps(result) == 'null':
                 return {'id': student_id, 'name:': 'null'}
             return {'id': student_id, 'name:': result[0]}
+        else:
+            return {'id': student_id, 'name:': result[0]}
     else:
         return {'error': 'id as an argument should be provided'}
 
