@@ -1,11 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Students</title>
-</head>
-<body>
-    {{ percentage }} % students are present in total
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Students</title>
+    </head>
+    <body>
+        <form action="/students/search" method="POST">
+            <div>
+                <!-- Search -->
+                <div>
+                    <input
+                        placeholder="Search for student"
+                        name="search_query"
+                        value=""
+                    />
+                    <button type="submit">Search</button>
+                </div>
+            </div>
+        </form>
+        <div>
+            {% if list_of_info is defined %}
+                {% for a in list_of_info %}
+                <p>
+                    Name: {{ a['id'] }}
+                </p>
+                {% endfor %} 
+            {% endif %}
+        </div>
+        <div>
+            {% if percentage is defined: %}
+                {{ percentage }} % students are present in total 
+            {% endif %}
+        </div>
+    </body>
 </html>
