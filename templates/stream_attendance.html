@@ -11,20 +11,27 @@
         <a href="/">Home</a>
       </div>
     </nav>
-    <form method="POST">
-      {% for key, value in student_info.items() %}
-      <div>
-        <label>
-          {{ roll_number_from_id(key) }}<input
-            type="checkbox"
-            name="{{ key }}"
-            value="{{ value }}" />
-          {{ value }}
-        </label>
-      </div>
-      {% endfor %}
-
-      <button type="submit">Submit</button>
-    </form>
+    <div>
+      {% if attendance_taken_or_not %}
+      <div><p>Attendance has already been taken today for {{stream_name}} stream of {{stream_class}}.</p></div>
+      {% else %}
+      <form method="POST">
+        {% for key, value in student_info.items() %}
+        <div>
+          <label>
+            {{ roll_number_from_id(key) }}<input
+              type="checkbox"
+              name="{{ key }}"
+              value="{{ value }}" />
+            {{ value }}
+          </label>
+        </div>
+        {% endfor %}
+  
+        <button type="submit">Submit</button>
+      </form>
+      {% endif %}
+    </div>
+    
   </body>
 </html>
