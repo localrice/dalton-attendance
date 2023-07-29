@@ -86,6 +86,7 @@ def student_name():
     else:
         return {'error': 'id as an argument should be provided'}
 
+
 @api_bp.route('/api/all-info')
 def student_info():
     db = get_db()
@@ -100,12 +101,13 @@ def student_info():
             cursor.execute(query, (student_id,))
             result = cursor.fetchone()
             if json.dumps(result) == 'null':
-                return {'id': student_id, 'error':'No student with the ID could be found'}
-            return {'id': result[0], 'name': result[1],'roll_no':result[2],'stream':result[3],'phone_numbers':result[4],'academic_year_from':result[5],'academic_year_to':result[6]}
+                return {'id': student_id, 'error': 'No student with the ID could be found'}
+            return {'id': result[0], 'name': result[1], 'roll_no': result[2], 'stream': result[3], 'phone_numbers': result[4], 'academic_year_from': result[5], 'academic_year_to': result[6]}
         else:
-            return {'id': result[0], 'name': result[1],'roll_no':result[2],'stream':result[3],'phone_numbers':result[4],'academic_year_from':result[5],'academic_year_to':result[6]}
+            return {'id': result[0], 'name': result[1], 'roll_no': result[2], 'stream': result[3], 'phone_numbers': result[4], 'academic_year_from': result[5], 'academic_year_to': result[6]}
     else:
         return {'error': 'id as an argument should be provided'}
+
 
 @api_bp.route('/api/total-students')
 def total_students():
@@ -157,3 +159,30 @@ def total_students():
         return {'streams': available_streams, 'classes': available_classes, 'number_of_students': total_students}
     else:  # read the api docs, if doc ain't available make one yourself
         return 'quack quack, this api is wack'
+
+
+@api_bp.route('/api/attendance-count')
+def count_id_in_present_and_absent():
+    db = get_db()
+    cursor = db.cursor()
+    id = request.args.get('id')
+    if id:
+        query_present = "SELECT present FROM dailyAttendance;"
+        cursor.execute(query_present)
+        result = cursor.fetchall()
+        count_present = 0
+        for item in result:
+            string_value = item[0]
+            ids = string_value.split(',')
+            count_present += ids.count(id)
+        query_present = "SELECT absent FROM dailyAttendance;"
+        cursor.execute(query_present)
+        result = cursor.fetchall()
+        count_absent = 0
+        for item in result:
+            string_value = item[0]
+            ids = string_value.split(',')
+            count_absent += ids.count(id)
+        return {'present': count_present, 'absent': count_absent}
+    else:
+        return {'error': 'must provide an id'}
