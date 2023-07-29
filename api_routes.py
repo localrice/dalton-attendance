@@ -186,3 +186,18 @@ def count_id_in_present_and_absent():
         return {'present': count_present, 'absent': count_absent}
     else:
         return {'error': 'must provide an id'}
+
+@api_bp.route('/api/attendance-taken-or-not')
+def attemdance_taken_or_not():
+    db = get_db()
+    cursor = db.cursor()
+    requested_class = request.args.get('class')
+    requested_stream = request.args.get('stream')
+    requested_date = request.args.get('date')
+    if requested_date:
+        pass
+    else:
+        requested_date = datetime.now().strftime("%d-%m-%Y")
+    cursor.execute("SELECT COUNT(*) FROM dailyAttendance WHERE stream=? AND date=? AND class=?", (requested_stream, requested_date, requested_class,))
+    row_count = cursor.fetchone()[0]
+    return {'attendance_taken':row_count>0}
