@@ -21,8 +21,6 @@ def check(name: str):
     '''
     pattern = r'\b\w+\b|\s*=\s*|\b=\b'
     name_tokens = remove_spaces_from_list(re.findall(pattern, name.lower()))
-
-    print(name_tokens)
     for token in name_tokens:
         if token in sql_keywords:
             return True
