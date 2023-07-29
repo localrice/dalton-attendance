@@ -20,8 +20,8 @@
             </div>
         </form>
         <div>
-            {% if list_of_info is defined %}
-                {% for a in list_of_info %}
+            {% if list_of_info is defined and id_attendance_count_list is defined %}
+                {% for index,a in enumerate(list_of_info) %}
                 <div>
                     <p><strong>Name:</strong> {{ a['name'] }}</p>
                     <p><strong>Class:</strong> {{ a['class'] }}</p>
@@ -29,6 +29,9 @@
                     <p><strong>Stream:</strong> {{ a['stream'] }}</p>
                     <p><strong>ID:</strong> {{ a['id'] }}</p>
                     <p><strong>Academic year:</strong> {{ a['academic_year_from'] }} - {{ a['academic_year_to'] }}</p>
+                    <p><strong>Present days:</strong>{{ id_attendance_count_list[index]['present'] }}</p>
+                    <p><strong>Absent days:</strong>{{ id_attendance_count_list[index]['absent'] }}</p>
+                    <p><strong>Attendance:</strong> {{ round((id_attendance_count_list[index]['present'] /(id_attendance_count_list[index]['present']+id_attendance_count_list[index]['absent']) *100 )) }}%</p>
                 </div>
                 <hr>
                 {% endfor %} 
@@ -43,6 +46,8 @@
             {% if percentage is defined: %}
                 {{ percentage }} % students are present in total 
             {% endif %}
+        </div>
+        <div>
         </div>
     </body>
 </html>
