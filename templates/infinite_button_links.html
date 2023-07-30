@@ -1,16 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en" class="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DarL</title>
     <link rel="stylesheet" href="/static/output.css" />
-</head>
-<body>
-    {% for name, url in url_dict.items() %}
-    <div class="button">
+  </head>
+  <body
+    class="flex justify-center items-center h-screen bg-gray-100 dark:bg-black">
+    <main class="flex flex-col gap-2">
+      <span class="mb-12 text-center">
+        <h2 class="text-black dark:text-white font-bold font-sans text-2xl">
+          {{ title }}
+        </h2>
+      </span>
+      {% for name, url in url_dict.items() %}
+      <div class="button w-48">
         <a href="{{ url }}">{{ name }}</a>
       </div>
       {% endfor %}
-</body>
+    </main>
+  </body>
 </html>
