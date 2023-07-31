@@ -61,6 +61,8 @@ def phone_number_list():
             result = cursor.fetchone()
             phone_numbers_json = json.dumps(result)
             return {'id': student_id, 'phone-numbers': phone_numbers_json}
+        else:
+            return {'id': student_id, 'phone-numbers': phone_numbers_json}
     else:
         return {'error': 'id as an argument should be provided'}
 
