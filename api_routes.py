@@ -2,6 +2,7 @@ from flask import Blueprint, request, g, Flask
 import sqlite3
 import json
 from datetime import datetime
+import ast
 
 # some configs
 DATABASE = 'dalton.db'
@@ -60,7 +61,27 @@ def phone_number_list():
             cursor.execute(query, (student_id,))
             result = cursor.fetchone()
             phone_numbers_json = json.dumps(result)
-            return {'id': student_id, 'phone-numbers': phone_numbers_json}
+            
+
+            def process_input(input_str):
+                 try:
+                     parsed_data = ast.literal_eval(input_str)
+                     if isinstance(parsed_data, list):
+                         numbers_list = []
+                         for item in parsed_data:
+                             if isinstance(item, str) and ',' in item:
+                                 numbers_list.extend([int(num) for num in item.split(',')])
+                             else:
+                                 numbers_list.append(int(item))
+                         return numbers_list
+                     else:
+                         print("Input does not represent a list.")
+                         return None
+                 except (SyntaxError, ValueError):
+                     print("Invalid input format.")
+                     return None
+
+            return {'id': student_id, 'phone-numbers': process_input(f'{phone_numbers_json}')}
         else:
             return {'id': student_id, 'phone-numbers': phone_numbers_json}
     else:
@@ -82,9 +103,9 @@ def student_name():
             result = cursor.fetchone()
             if json.dumps(result) == 'null':
                 return {'id': student_id, 'name:': 'null'}
-            return {'id': student_id, 'name:': result[0]}
+            return {'id': student_id, 'name': result[0]}
         else:
-            return {'id': student_id, 'name:': result[0]}
+            return {'id': student_id, 'name': result[0]}
     else:
         return {'error': 'id as an argument should be provided'}
 
