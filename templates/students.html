@@ -31,7 +31,12 @@
                     <p><strong>Academic year:</strong> {{ a['academic_year_from'] }} - {{ a['academic_year_to'] }}</p>
                     <p><strong>Present days:</strong>{{ id_attendance_count_list[index]['present'] }}</p>
                     <p><strong>Absent days:</strong>{{ id_attendance_count_list[index]['absent'] }}</p>
+                    {% if id_attendance_count_list[index]['present'] == 0 and id_attendance_count_list[index]['absent'] == 0  %}
+                        <p>Attendance hasn't been taken for this student yet. Might be a new student.</p>
+                    {% else %}
                     <p><strong>Attendance:</strong> {{ round((id_attendance_count_list[index]['present'] /(id_attendance_count_list[index]['present']+id_attendance_count_list[index]['absent']) *100 )) }}%</p>
+                    {% endif %}
+                    
                 </div>
                 <hr>
                 {% endfor %} 
