@@ -2,8 +2,7 @@ from flask import Blueprint, request, g, Flask
 import sqlite3
 import json
 from datetime import datetime
-import ast
-
+from utils.process_phone_number import process_result_from_query
 # some configs
 DATABASE = 'dalton.db'
 
@@ -61,29 +60,9 @@ def phone_number_list():
             cursor.execute(query, (student_id,))
             result = cursor.fetchone()
             phone_numbers_json = json.dumps(result)
-            
-
-            def process_input(input_str):
-                 try:
-                     parsed_data = ast.literal_eval(input_str)
-                     if isinstance(parsed_data, list):
-                         numbers_list = []
-                         for item in parsed_data:
-                             if isinstance(item, str) and ',' in item:
-                                 numbers_list.extend([int(num) for num in item.split(',')])
-                             else:
-                                 numbers_list.append(int(item))
-                         return numbers_list
-                     else:
-                         print("Input does not represent a list.")
-                         return None
-                 except (SyntaxError, ValueError):
-                     print("Invalid input format.")
-                     return None
-
-            return {'id': student_id, 'phone-numbers': process_input(f'{phone_numbers_json}')}
+            return {'id': student_id, 'phone-numbers': process_result_from_query(f'{phone_numbers_json}')}
         else:
-            return {'id': student_id, 'phone-numbers': phone_numbers_json}
+            return {'id': student_id, 'phone-numbers': process_result_from_query(f'{phone_numbers_json}')}
     else:
         return {'error': 'id as an argument should be provided'}
 
@@ -125,9 +104,9 @@ def student_info():
             result = cursor.fetchone()
             if json.dumps(result) == 'null':
                 return {'id': student_id, 'error': 'No student with the ID could be found'}
-            return {'id': result[0], 'name': result[1], 'roll_no': result[2], 'stream': result[3], 'phone_numbers': result[4], 'academic_year_from': result[5], 'academic_year_to': result[6],'class':12}
+            return {'id': result[0], 'name': result[1], 'roll_no': result[2], 'stream': result[3], 'phone_numbers': result[4], 'academic_year_from': result[5], 'academic_year_to': result[6], 'class': 12}
         else:
-            return {'id': result[0], 'name': result[1], 'roll_no': result[2], 'stream': result[3], 'phone_numbers': result[4], 'academic_year_from': result[5], 'academic_year_to': result[6],'class':11}
+            return {'id': result[0], 'name': result[1], 'roll_no': result[2], 'stream': result[3], 'phone_numbers': result[4], 'academic_year_from': result[5], 'academic_year_to': result[6], 'class': 11}
     else:
         return {'error': 'id as an argument should be provided'}
 
@@ -210,6 +189,7 @@ def count_id_in_present_and_absent():
     else:
         return {'error': 'must provide an id'}
 
+
 @api_bp.route('/api/attendance-taken-or-not')
 def attemdance_taken_or_not():
     db = get_db()
@@ -221,6 +201,7 @@ def attemdance_taken_or_not():
         pass
     else:
         requested_date = datetime.now().strftime("%d-%m-%Y")
-    cursor.execute("SELECT COUNT(*) FROM dailyAttendance WHERE stream=? AND date=? AND class=?", (requested_stream, requested_date, requested_class,))
+    cursor.execute("SELECT COUNT(*) FROM dailyAttendance WHERE stream=? AND date=? AND class=?",
+                   (requested_stream, requested_date, requested_class,))
     row_count = cursor.fetchone()[0]
-    return {'attendance_taken':row_count>0}
+    return {'attendance_taken': row_count > 0}
