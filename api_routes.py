@@ -102,9 +102,9 @@ def student_info():
             result = cursor.fetchone()
             if json.dumps(result) == 'null':
                 return {'id': student_id, 'error': 'No student with the ID could be found'}
-            return {'id': result[0], 'name': result[1], 'roll_no': result[2], 'stream': result[3], 'phone_numbers': result[4], 'academic_year_from': result[5], 'academic_year_to': result[6]}
+            return {'id': result[0], 'name': result[1], 'roll_no': result[2], 'stream': result[3], 'phone_numbers': result[4], 'academic_year_from': result[5], 'academic_year_to': result[6],'class':12}
         else:
-            return {'id': result[0], 'name': result[1], 'roll_no': result[2], 'stream': result[3], 'phone_numbers': result[4], 'academic_year_from': result[5], 'academic_year_to': result[6]}
+            return {'id': result[0], 'name': result[1], 'roll_no': result[2], 'stream': result[3], 'phone_numbers': result[4], 'academic_year_from': result[5], 'academic_year_to': result[6],'class':11}
     else:
         return {'error': 'id as an argument should be provided'}
 
