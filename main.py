@@ -158,7 +158,6 @@ def students():
 @app.route('/students/search', methods=['POST', 'GET'])
 def search():
     db = get_db()
-    cursor = db.cursor()
     if request.method == "POST":
         search_value = request.form.get('search_query')
         table_names = ['StudentInfo11', 'StudentInfo12']
