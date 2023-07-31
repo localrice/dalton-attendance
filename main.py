@@ -45,7 +45,7 @@ def attendance():
         '11': '/attendance/stream?class=11',
         '12': '/attendance/stream?class=12'
     }
-    return render_template('infinite_button_links.html', url_dict=url_dict)
+    return render_template('infinite_button_links.html', url_dict=url_dict, title='Choose a class:')
 
 
 @app.route('/attendance/stream')
@@ -56,7 +56,7 @@ def stream():
         'commerce': f'/attendance/stream/commerce?class={stream_class}',
         'arts': f'/attendance/stream/arts?class={stream_class}'
     }
-    return render_template('infinite_button_links.html', url_dict=url_dict)
+    return render_template('infinite_button_links.html', url_dict=url_dict, title=f'Choose a stream of the class:')
 
 
 @app.route('/attendance/stream/<stream_name>', methods=['GET', 'POST'])
@@ -115,8 +115,8 @@ def data():
         roll_no = form_data.get('roll number')
         student_class = form_data.get('class')
         student_name = form_data.get('student name')
-        year1 = int(form_data.get('year1'))
-        year2 = int(form_data.get('year2'))
+        year1 = int('20' + form_data.get('year1'))
+        year2 = int('20' + form_data.get('year2'))
         phone_numbers_str = request.form.get('phone_numbers')
         phone_numbers = phone_numbers_str.split(
             ',') if phone_numbers_str else []
@@ -161,18 +161,25 @@ def search():
     cursor = db.cursor()
     if request.method == "POST":
         search_value = request.form.get('search_query')
-        similar_names = fuzzy_search_names(
-            search_value, db=db, table_name='StudentInfo12')
+        table_names = ['StudentInfo11', 'StudentInfo12']
+        similar_names = {}
+        for table_name in table_names:
+            result = fuzzy_search_names(
+                search_value, db=db, table_name=table_name)
+            if 'error' in result:
+                if result['error'] == 'unsafe searched_name':
+                    return 'Unsafe search'
+            else:
+                similar_names.update(result)
+        if not similar_names:
+            return render_template('students.html', error=f'no student with the name {search_value}')
         similar_ids = [values for key, values in similar_names.items()]
         list_of_info = []
         for id in similar_ids:
             student_info = requests.get(
                 f'http://localhost:5000/api/all-info?id={id}').json()
             list_of_info.append(student_info)
-        if 'error' in similar_names:
-            if similar_names['error'] == 'unsafe searched_name':
-                return
-            return render_template('students.html', error=f'no student with the name {search_value}')
+
         else:
             id_attendance_count_list = []
 
