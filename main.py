@@ -1,10 +1,10 @@
 from os import path, walk
-from flask import render_template, request, Flask, g
+from flask import render_template, request, Flask, g, url_for, redirect
 import sqlite3
 from datetime import datetime
 from utils.check_student_exists import check_student_exists
 from utils.id_generator import id_generator
-from utils.extract_info import roll_number_from_id
+from utils.extract_info import roll_number_from_id,student_details
 from utils.sort_dict import sort_dict_by_id
 from utils.list_string import list_to_string
 from api_routes import api_bp
@@ -142,7 +142,9 @@ def data():
         # check if the data is successfully saved
         status = check_student_exists(
             db=db, table_name=table_name, student_id=student_id)
-        return render_template('data.html', form_data=form_data, status=status)
+        #return render_template('data.html', form_data=form_data, status=status)
+        redirect_url =url_for('search')+'?id='+student_id
+        return redirect(redirect_url)
 
 
 @app.route('/students/', methods=['POST', 'GET'])
@@ -158,6 +160,9 @@ def students():
 @app.route('/students/search', methods=['POST', 'GET'])
 def search():
     db = get_db()
+    student_id =  request.args.get('id')
+    list_of_info = []
+    id_attendance_count_list = []
     if request.method == "POST":
         search_value = request.form.get('search_query')
         table_names = ['StudentInfo11', 'StudentInfo12']
@@ -173,21 +178,28 @@ def search():
         if not similar_names:
             return render_template('students.html', error=f'no student with the name {search_value}')
         similar_ids = [values for key, values in similar_names.items()]
-        list_of_info = []
+        
         for id in similar_ids:
             student_info = requests.get(
                 f'http://localhost:5000/api/all-info?id={id}').json()
             list_of_info.append(student_info)
 
         else:
-            id_attendance_count_list = []
-
+            
             for id in similar_ids:
                 attendance_count = requests.get(
                     f'http://localhost:5000/api/attendance-count?id={id}').json()
                 attendance_count['id'] = id
                 id_attendance_count_list.append(attendance_count)
-            return render_template('students.html', list_of_info=list_of_info, id_attendance_count_list=id_attendance_count_list, enumerate=enumerate, round=round)
+            return render_template('students.html', list_of_info=list_of_info, id_attendance_count_list=id_attendance_count_list, enumerate=enumerate, round=round) 
+    elif student_id is not None:
+        student_info = requests.get(
+                f'http://localhost:5000/api/all-info?id={student_id}').json()
+        list_of_info.append(student_info)
+        attendance_count = requests.get(
+                    f'http://localhost:5000/api/attendance-count?id={student_id}').json()
+        id_attendance_count_list.append(attendance_count)
+        return render_template('students.html', list_of_info=list_of_info, id_attendance_count_list=id_attendance_count_list, enumerate=enumerate, round=round) 
 
 
 extra_dirs = ['./templates/',]
