@@ -7,6 +7,9 @@ module.exports = {
   content: ['./templates/**/*.html'],
   theme: {
     extend: {
+      gridTemplateColumns: {
+        StudentCards: 'repeat(auto-fit, minmax(350px, 1fr))',
+      },
       keyframes: {
         'blob-spin': {
           '0%': {
