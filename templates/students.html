@@ -1,58 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Students</title>
-    </head>
-    <body>
-        <form action="/students/search" method="POST">
-            <div>
-                <!-- Search -->
-                <div>
-                    <input
-                        placeholder="Search for student"
-                        name="search_query"
-                        value=""
-                    />
-                    <button type="submit">Search</button>
-                </div>
-            </div>
-        </form>
-        <div>
-            {% if list_of_info is defined and id_attendance_count_list is defined %}
-                {% for index,a in enumerate(list_of_info) %}
-                <div>
-                    <p><strong>Name:</strong> {{ a['name'] }}</p>
-                    <p><strong>Class:</strong> {{ a['class'] }}</p>
-                    <p><strong>Roll number:</strong> {{ a['roll_no'] }}</p>
-                    <p><strong>Stream:</strong> {{ a['stream'] }}</p>
-                    <p><strong>ID:</strong> {{ a['id'] }}</p>
-                    <p><strong>Academic year:</strong> {{ a['academic_year_from'] }} - {{ a['academic_year_to'] }}</p>
-                    <p><strong>Present days:</strong>{{ id_attendance_count_list[index]['present'] }}</p>
-                    <p><strong>Absent days:</strong>{{ id_attendance_count_list[index]['absent'] }}</p>
-                    {% if id_attendance_count_list[index]['present'] == 0 and id_attendance_count_list[index]['absent'] == 0  %}
-                        <p>Attendance hasn't been taken for this student yet. Might be a new student.</p>
-                    {% else %}
-                    <p><strong>Attendance:</strong> {{ round((id_attendance_count_list[index]['present'] /(id_attendance_count_list[index]['present']+id_attendance_count_list[index]['absent']) *100 )) }}%</p>
-                    {% endif %}
-                    
-                </div>
-                <hr>
-                {% endfor %} 
-            {% endif %}
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/output.css" />
+    <title>Students</title>
+  </head>
+  <body class="bg-gray-100 dark:bg-black">
+    <div class="flex items-center justify-center mb-12">
+      <form action="/students/search" class="py-6" method="POST">
+        <!-- Search -->
+        <div class="flex items-center relative">
+          <a
+            href="/"
+            class="button right-[98%] w-12 absolute button-remove-shadow rounded-r-none">
+            <p class="text-xl">{% include "icons/icon_home.html" %}</p>
+          </a>
+          <input
+            placeholder="Search for student"
+            minlength="3"
+            required
+            class="input-text rounded-none border-x-transparent dark:border-x-transparent placeholder:text-sm pl-4"
+            name="search_query"
+            value="" />
+          <button
+            class="button w-fit text-xl absolute left-[98%] button-remove-shadow rounded-l-none"
+            type="submit">
+            {% include "icons/icon_search.html" %}
+          </button>
         </div>
-        <div>
-            {% if error is defined %}
-            <p><strong>{{error}}</strong></p>
-            {% endif %}
-        </div>
-        <div>
-            {% if percentage is defined: %}
-                {{ percentage }} % students are present in total 
-            {% endif %}
-        </div>
-        <div>
-        </div>
-    </body>
+      </form>
+    </div>
+
+    <!-- student cards -->
+    <div class="w-full grid grid-cols-StudentCards">
+      {% if list_of_info is defined and id_attendance_count_list is defined %}
+      {% for index, a in enumerate(list_of_info) %}
+      <!-- {{ a['id'] }} -->
+      <span
+        class="p-4 px-6 pb-8 flex flex-col gap-1 border rounded-md border-gray-300 bg-gray-200/30 dark:border-gray-700 dark:bg-gray-400/5">
+        <p
+          title="Name of the student"
+          class="font-semibold text-2xl my-2 font-sans dark:text-white">
+          {{ a['name'] }}
+        </p>
+
+        <p class="flex items-center gap-2 dark:text-gray-300" title="class">
+          <span>{% include("icons/icon_book.html") %}</span>
+          <span>studing in </span>
+          <span> {{ a['class'] }}th </span>
+        </p>
+
+        <p
+          class="flex items-center gap-2 dark:text-gray-300"
+          title="Roll number">
+          <span>{% include("icons/icon_hashtag.html") %}</span>
+          <span> {{ a['roll_no'] }} </span>
+        </p>
+
+        <p class="flex items-center gap-2 dark:text-gray-300" title="Stream">
+          <span>{% include("icons/icon_maths.html") %}</span>
+          <span>studing</span>
+          <span> {{ a['stream'] }} </span>
+        </p>
+
+        <p
+          class="flex items-center gap-2 dark:text-gray-300"
+          title="academic year">
+          <span class=""> {% include('/icons/icon_calender.html') %} </span>
+          <span>
+            {{ a['academic_year_from'] }} to {{ a['academic_year_to'] }}
+          </span>
+        </p>
+
+        <span>
+          <p
+            title="days present"
+            class="flex items-center gap-2 dark:text-gray-300">
+            <span>{% include("icons/icon_check.html") %}</span>
+            <span> {{ id_attendance_count_list[index]['present'] }} </span>
+            <span>days present</span>
+          </p>
+
+          <p
+            class="flex items-center gap-2 dark:text-gray-300"
+            title="days absent">
+            <span>{% include("icons/icon_close.html") %}</span>
+            <span> {{ id_attendance_count_list[index]['absent'] }} </span>
+            <span>days absent</span>
+          </p>
+        </span>
+
+        {% if id_attendance_count_list[index]['present'] == 0 and
+        id_attendance_count_list[index]['absent'] == 0 %}
+        <p class="flex items-baseline gap-2 dark:text-gray-300">
+          <span class="text-sm">{% include("icons/icon_alert.html") %}</span>
+          <span>
+            Attendance hasn't been taken for this student yet. Might be a new
+            student.
+          </span>
+        </p>
+
+        {% else %}
+
+        <p>
+          {{ round((id_attendance_count_list[index]['present']
+          /(id_attendance_count_list[index]['present']+id_attendance_count_list[index]['absent'])
+          *100 )) }}%
+        </p>
+        {% endif %}
+      </span>
+      {% endfor %} {% endif %}
+    </div>
+
+    <!-- incase of errors -->
+    <div>
+      {% if error is defined %}
+      <p class="text-red-700 font-mono">{{ error }}</p>
+      {% endif %}
+    </div>
+
+    <!-- total % -->
+    <div class="w-ful font-sans tracking-wider">
+      <p class="mx-auto w-fit">
+        {% if percentage is defined: %} {{ percentage }}% students are present
+        in total. {% endif %}
+      </p>
+    </div>
+    <div></div>
+  </body>
 </html>
