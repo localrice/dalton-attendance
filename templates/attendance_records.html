@@ -44,6 +44,14 @@
             {% else %}
                 <p><h3>attendance hasn't been taken yet </h3></p>
             {% endif %}
+            {% if len(present_students[stream]) == 0 and len(absent_students[stream]) == 0 %}
+              
+            {% else %}
+            <div>
+              {{ round(len(present_students[stream]) / (len(present_students[stream]) +len(absent_students[stream])) *100) }} % students present from {{stream}}
+            </div>
+            {% endif %}
+          
           </div>
       {% endfor %}
   {% else %}

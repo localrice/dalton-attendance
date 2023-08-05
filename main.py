@@ -277,9 +277,12 @@ def attendance_records():
                 if response.status_code == 200:
                     data = response.json()
                     roll_number_dict[data['id']] = data['roll_no']
+    if len(roll_number_dict.keys()) == 0:
+        return render_template('error.html',message="No records found for the specified date, stream and class.")
     return render_template('attendance_records.html', student_info=student_info_list, present_students=present_ids_dict,
                            absent_students=absent_ids_dict, show_table=True, len=len, max=max, str=str, range=range,
-                           enumerate=enumerate, next=next, iter=iter, list=list, date=processed_date, available_streams=available_streams, roll_number_dict=roll_number_dict)
+                           enumerate=enumerate, next=next, iter=iter, list=list, date=processed_date, available_streams=available_streams,
+                            roll_number_dict=roll_number_dict, round=round)
 
 
 extra_dirs = ['./templates/',]
