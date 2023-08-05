@@ -211,6 +211,92 @@ def search():
         return render_template('error.html', message="ID is blank, pls provide a valid ID or return to <a href='/students'>Stdudents info</a>")
 
 
+@app.route('/attendance-records/',  methods=['POST', 'GET'])
+def attendance_records():
+    db = get_db()
+    cursor = db.cursor()
+    if request.method == 'POST':
+        form_data = dict(request.form)
+        selected_class = form_data.get('class')
+        selected_stream = form_data.get('stream')
+        selected_date = form_data.get('date')
+
+        if selected_class != 'all-classes' and selected_stream != 'all-streams':
+            processed_date = datetime.strptime(
+                selected_date, '%Y-%m-%d').strftime('%d-%m-%Y')
+            table_name = f'StudentInfo{selected_class}'
+
+            cursor.execute(
+                f'SELECT student_id FROM {table_name} WHERE stream = ?', (selected_stream,))
+            results = cursor.fetchall()
+            # stores all the id of the students present in the stream without the academic year at the end
+            student_id = [id[0] for id in results]
+
+            cursor.execute(
+                f'SELECT student_name FROM {table_name} WHERE stream = ?', (selected_stream,))
+            results = cursor.fetchall()
+            # stores all the names of the students present in the stream
+            student_names = [result[0] for result in results]
+
+            # creates a dictionary with the key as student's id and value as student's name arranged in increasing order of the roll number in the student id
+            student_info = sort_dict_by_id(
+                dict(zip(student_id, student_names)))
+
+            cursor.execute(
+                f'SELECT present FROM dailyAttendance WHERE date=? AND class=? AND stream=?', (processed_date, selected_class, selected_stream,))
+            present_ids = cursor.fetchall()[0][0].split(
+                ',')  # seperates each id from the tuple
+            print(present_ids)
+            cursor.execute(
+                f'SELECT absent FROM dailyAttendance WHERE date=? AND class=? AND stream=?', (processed_date, selected_class, selected_stream,))
+            absent_ids = cursor.fetchall()[0][0].split(',')
+
+            return render_template('attendance_table.html', student_info=student_info, present_students=present_ids, absent_students=absent_ids, show_table=True, len=len, max=max, str=str, range=range)
+
+        elif selected_stream == 'all-streams':
+            student_info_list = []
+            present_ids_dict = {}
+            absent_ids_dict = {}
+            available_streams = ['science', 'commerce', 'arts']
+            processed_date = datetime.strptime(
+                selected_date, '%Y-%m-%d').strftime('%d-%m-%Y')
+            table_name = f'StudentInfo{selected_class}'
+            for stream in available_streams:
+                cursor.execute(
+                    f'SELECT student_id FROM {table_name} WHERE stream = ?', (stream,))
+                results = cursor.fetchall()
+                # stores all the id of the students present in the stream without the academic year at the end
+                student_id = [id[0] for id in results]
+                cursor.execute(
+                    f'SELECT student_name FROM {table_name} WHERE stream = ?', (stream,))
+                results = cursor.fetchall()
+                # stores all the names of the students present in the stream
+                student_names = [result[0] for result in results]
+
+                # creates a dictionary with the key as student's id and value as student's name arranged in increasing order of the roll number in the student id
+                student_info = sort_dict_by_id(
+                    dict(zip(student_id, student_names)))
+                student_info_list.append(student_info)
+                cursor.execute(
+                    f'SELECT present FROM dailyAttendance WHERE date=? AND class=? AND stream=?', (processed_date, selected_class, stream,))
+                result = cursor.fetchall()
+                if len(result) == 0:
+                    pass
+                else:
+                    present_ids_dict[stream] = result[0][0].split(
+                        ',')  # seperates each id from the tuple
+                cursor.execute(
+                    f'SELECT absent FROM dailyAttendance WHERE date=? AND class=? AND stream=?', (processed_date, selected_class, stream,))
+                result = cursor.fetchall()
+                if len(result) == 0:
+                    pass
+                else:
+                    absent_ids_dict[stream] = result[0][0].split(
+                        ',')   # seperates each id from the tuple
+            return render_template('attendance_table.html', student_info=student_info_list, present_students=present_ids_dict, absent_students=absent_ids_dict, show_table=True, len=len, max=max, str=str, range=range, enumerate=enumerate, next=next, iter=iter, list=list, date=processed_date)
+    return render_template('attendance_table.html')
+
+
 extra_dirs = ['./templates/',]
 extra_files = extra_dirs[:]
 for extra_dir in extra_dirs:
