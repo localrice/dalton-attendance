@@ -275,10 +275,10 @@ def attendance_records():
                     if response.status_code == 200:
                         data = response.json()
                         roll_number_dict[data['id']] = data['roll_no']
-        return render_template('attendance_table.html', student_info=student_info_list, present_students=present_ids_dict,
+        return render_template('attendance_records.html', student_info=student_info_list, present_students=present_ids_dict,
                                absent_students=absent_ids_dict, show_table=True, len=len, max=max, str=str, range=range,
                                enumerate=enumerate, next=next, iter=iter, list=list, date=processed_date, available_streams=available_streams,roll_number_dict=roll_number_dict)
-    return render_template('attendance_table.html')
+    return render_template('attendance_records.html')
 
 
 extra_dirs = ['./templates/',]
