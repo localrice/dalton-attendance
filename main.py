@@ -90,9 +90,6 @@ def stream_attendance(stream_name):
         cursor.execute(sql_insert, data)
         db.commit()
         return redirect(f'http://localhost:5000/attendance-records?date={date}&class={stream_class}&stream={stream_name}')
-        # return render_template('attendance_taken.html', stream_name=stream_name, student_info=student_info,
-        #                       present_students=selected_id, absent_students=absent_student_ids,
-        #                       len=len, max=max, str=str)
 
     attendance_taken_or_not = requests.get(
         f'http://localhost:5000/api/attendance-taken-or-not?stream={stream_name}&class={stream_class}').json()['attendance_taken']
