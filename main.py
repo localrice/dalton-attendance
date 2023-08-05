@@ -90,7 +90,7 @@ def stream_attendance(stream_name):
         cursor.execute(sql_insert, data)
         db.commit()
         return redirect(f'http://localhost:5000/attendance-records?date={date}&class={stream_class}&stream={stream_name}')
-        #return render_template('attendance_taken.html', stream_name=stream_name, student_info=student_info,
+        # return render_template('attendance_taken.html', stream_name=stream_name, student_info=student_info,
         #                       present_students=selected_id, absent_students=absent_student_ids,
         #                       len=len, max=max, str=str)
 
@@ -216,125 +216,73 @@ def search():
 def attendance_records():
     db = get_db()
     cursor = db.cursor()
+    student_class = request.args.get('class')
+    student_stream = request.args.get('stream')
+    requested_date = request.args.get('date')
+    student_info_list = []
+    present_ids_dict = {}
+    absent_ids_dict = {}
     if request.method == 'POST':
         form_data = dict(request.form)
         selected_class = form_data.get('class')
         selected_stream = form_data.get('stream')
         selected_date = form_data.get('date')
-        student_info_list = []
-        present_ids_dict = {}
-        absent_ids_dict = {}
-        if check_date_format(selected_date) == '%Y-%m-%d':
-            processed_date = datetime.strptime(
-                selected_date, '%Y-%m-%d').strftime('%d-%m-%Y')
+    elif student_class != None or student_stream != None or requested_date != None:
+        selected_class = student_class
+        selected_stream = student_stream
+        selected_date = requested_date
+    else:
+        return render_template('attendance_records.html')
+
+    processed_date = datetime.strptime(
+        selected_date, check_date_format(selected_date)).strftime('%d-%m-%Y')
+
+    table_name = f'StudentInfo{selected_class}'
+
+    if selected_class != 'all-classes' and selected_stream != 'all-streams':
+        available_streams = [selected_stream]
+    elif selected_stream == 'all-streams':
+        available_streams = ['science', 'commerce', 'arts']
+    for stream in available_streams:
+        cursor.execute(
+            f'SELECT student_id FROM {table_name} WHERE stream = ?', (stream,))
+        results = cursor.fetchall()
+        student_id = [id[0] for id in results]
+        cursor.execute(
+            f'SELECT student_name FROM {table_name} WHERE stream = ?', (stream,))
+        results = cursor.fetchall()
+        student_names = [result[0] for result in results]
+        student_info = sort_dict_by_id(
+            dict(zip(student_id, student_names)))
+        student_info_list.append(student_info)
+        cursor.execute(
+            f'SELECT present FROM dailyAttendance WHERE date=? AND class=? AND stream=?', (processed_date, selected_class, stream,))
+        result = cursor.fetchall()
+        if len(result) == 0:
+            pass
         else:
-            processed_date=selected_date
-        table_name = f'StudentInfo{selected_class}'
-
-        if selected_class != 'all-classes' and selected_stream != 'all-streams':
-            available_streams = [selected_stream]
-        elif selected_stream == 'all-streams':
-            available_streams = ['science', 'commerce', 'arts']
-        for stream in available_streams:
-            cursor.execute(
-                f'SELECT student_id FROM {table_name} WHERE stream = ?', (stream,))
-            results = cursor.fetchall()
-            student_id = [id[0] for id in results]
-            cursor.execute(
-                f'SELECT student_name FROM {table_name} WHERE stream = ?', (stream,))
-            results = cursor.fetchall()
-
-            student_names = [result[0] for result in results]
-            student_info = sort_dict_by_id(
-                dict(zip(student_id, student_names)))
-            student_info_list.append(student_info)
-
-            cursor.execute(
-                f'SELECT present FROM dailyAttendance WHERE date=? AND class=? AND stream=?', (processed_date, selected_class, stream,))
-            result = cursor.fetchall()
-            if len(result) == 0:
-                pass
-            else:
-                present_ids_dict[stream] = result[0][0].split(
-                    ',')  # seperates each id from the tuple
-            cursor.execute(
-                f'SELECT absent FROM dailyAttendance WHERE date=? AND class=? AND stream=?', (processed_date, selected_class, stream,))
-            result = cursor.fetchall()
-            if len(result) == 0:
-                pass
-            else:
-                absent_ids_dict[stream] = result[0][0].split(
-                    ',')   # seperates each id from the tuple
-        roll_number_dict = {}
-        for data_dict in [present_ids_dict, absent_ids_dict]:
-            for stream, ids in data_dict.items():
-                for student_id in ids:
-                    api_url = f"http://127.0.0.1:5000/api/all-info?id={student_id}"
-                    response = requests.get(api_url)
-                    if response.status_code == 200:
-                        data = response.json()
-                        roll_number_dict[data['id']] = data['roll_no']
-        return render_template('attendance_records.html', student_info=student_info_list, present_students=present_ids_dict,
-                               absent_students=absent_ids_dict, show_table=True, len=len, max=max, str=str, range=range,
-                               enumerate=enumerate, next=next, iter=iter, list=list, date=processed_date, available_streams=available_streams,roll_number_dict=roll_number_dict)
-    student_class = request.args.get('class')
-    student_stream = request.args.get('stream')
-    requested_date = request.args.get('date')
-    if student_class != None:
-        student_info_list = []
-        present_ids_dict = {}
-        absent_ids_dict = {}
-        if check_date_format(requested_date) == '%Y-%m-%d':
-            processed_date = datetime.strptime(
-                selected_date, '%Y-%m-%d').strftime('%d-%m-%Y')
+            present_ids_dict[stream] = result[0][0].split(
+                ',')  # seperates each id from the tuple
+        cursor.execute(
+            f'SELECT absent FROM dailyAttendance WHERE date=? AND class=? AND stream=?', (processed_date, selected_class, stream,))
+        result = cursor.fetchall()
+        if len(result) == 0:
+            pass
         else:
-            processed_date=requested_date
-        table_name = f'StudentInfo{student_class}'
-
-        available_streams = [student_stream]
-        for stream in available_streams:
-            cursor.execute(
-                f'SELECT student_id FROM {table_name} WHERE stream = ?', (stream,))
-            results = cursor.fetchall()
-            student_id = [id[0] for id in results]
-            cursor.execute(
-                f'SELECT student_name FROM {table_name} WHERE stream = ?', (stream,))
-            results = cursor.fetchall()
-
-            student_names = [result[0] for result in results]
-            student_info = sort_dict_by_id(
-                dict(zip(student_id, student_names)))
-            student_info_list.append(student_info)
-
-            cursor.execute(
-                f'SELECT present FROM dailyAttendance WHERE date=? AND class=? AND stream=?', (processed_date, student_class, stream,))
-            result = cursor.fetchall()
-            if len(result) == 0:
-                pass
-            else:
-                present_ids_dict[stream] = result[0][0].split(
-                    ',')  # seperates each id from the tuple
-            cursor.execute(
-                f'SELECT absent FROM dailyAttendance WHERE date=? AND class=? AND stream=?', (processed_date, student_class, stream,))
-            result = cursor.fetchall()
-            if len(result) == 0:
-                pass
-            else:
-                absent_ids_dict[stream] = result[0][0].split(
-                    ',')   # seperates each id from the tuple
-        roll_number_dict = {}
-        for data_dict in [present_ids_dict, absent_ids_dict]:
-            for stream, ids in data_dict.items():
-                for student_id in ids:
-                    api_url = f"http://127.0.0.1:5000/api/all-info?id={student_id}"
-                    response = requests.get(api_url)
-                    if response.status_code == 200:
-                        data = response.json()
-                        roll_number_dict[data['id']] = data['roll_no']
-        return render_template('attendance_records.html', student_info=student_info_list, present_students=present_ids_dict,
-                               absent_students=absent_ids_dict, show_table=True, len=len, max=max, str=str, range=range,
-                               enumerate=enumerate, next=next, iter=iter, list=list, date=processed_date, available_streams=available_streams,roll_number_dict=roll_number_dict)
-    return render_template('attendance_records.html')
+            absent_ids_dict[stream] = result[0][0].split(
+                ',')   # seperates each id from the tuple
+    roll_number_dict = {}
+    for data_dict in [present_ids_dict, absent_ids_dict]:
+        for stream, ids in data_dict.items():
+            for student_id in ids:
+                api_url = f"http://127.0.0.1:5000/api/all-info?id={student_id}"
+                response = requests.get(api_url)
+                if response.status_code == 200:
+                    data = response.json()
+                    roll_number_dict[data['id']] = data['roll_no']
+    return render_template('attendance_records.html', student_info=student_info_list, present_students=present_ids_dict,
+                           absent_students=absent_ids_dict, show_table=True, len=len, max=max, str=str, range=range,
+                           enumerate=enumerate, next=next, iter=iter, list=list, date=processed_date, available_streams=available_streams, roll_number_dict=roll_number_dict)
 
 
 extra_dirs = ['./templates/',]
