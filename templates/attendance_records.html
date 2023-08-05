@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dar</title>
+</head>
+
+<body>
+  <form action="/attendance-records" method="POST">
+    <select id="class" name="class" requried>
+      <option value="11">11</option>
+      <option value="12">12</option>
+    </select>
+    <select id="stream" name="stream" requried>
+      <option value="all-streams">all streams</option>
+      <option value="science">science</option>
+      <option value="commerce">commerce</option>
+      <option value="arts">arts</option>
+    </select>
+    <input type="date" name="date" id="date" required />
+    <input type="submit" value="Submit" />
+  </form>
+  
+  {% if show_table == True %}
+      {{date}}<br>
+      {% for stream in available_streams %}
+            <div>
+            <h2>{{stream}} stream</h2>
+            {% if present_students[stream] %}
+                <div>
+                  <h3>present:</h3>
+                  {% for id in present_students[stream] %}
+                      {{ roll_number_dict[id] }}.{{student_info[available_streams.index(stream)][id]}}
+                  {% endfor %}
+                </div>
+                <div>
+                  <h3>absent:</h3>
+                  {% for id in absent_students[stream] %}
+                      {{roll_number_dict[id]}}.{{student_info[available_streams.index(stream)][id]}}
+                  {% endfor %}
+                </div>
+            {% else %}
+                <p><h3>attendance hasn't been taken yet </h3></p>
+            {% endif %}
+          </div>
+      {% endfor %}
+  {% else %}
+  {% endif %}
+
+
+  
+</body>
+
+</html>
