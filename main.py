@@ -266,9 +266,18 @@ def attendance_records():
             else:
                 absent_ids_dict[stream] = result[0][0].split(
                     ',')   # seperates each id from the tuple
+        roll_number_dict = {}
+        for data_dict in [present_ids_dict, absent_ids_dict]:
+            for stream, ids in data_dict.items():
+                for student_id in ids:
+                    api_url = f"http://127.0.0.1:5000/api/all-info?id={student_id}"
+                    response = requests.get(api_url)
+                    if response.status_code == 200:
+                        data = response.json()
+                        roll_number_dict[data['id']] = data['roll_no']
         return render_template('attendance_table.html', student_info=student_info_list, present_students=present_ids_dict,
                                absent_students=absent_ids_dict, show_table=True, len=len, max=max, str=str, range=range,
-                               enumerate=enumerate, next=next, iter=iter, list=list, date=processed_date, available_streams=available_streams)
+                               enumerate=enumerate, next=next, iter=iter, list=list, date=processed_date, available_streams=available_streams,roll_number_dict=roll_number_dict)
     return render_template('attendance_table.html')
 
 
