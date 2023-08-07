@@ -26,4 +26,8 @@ input[type='number'] {
   .button-remove-shadow {
     @apply hover:shadow-none;
   }
+
+  .grid-bg-common {
+    @apply bg-gray-200 dark:bg-gray-200/10 py-[.4rem] px-3;
+  }
 }
