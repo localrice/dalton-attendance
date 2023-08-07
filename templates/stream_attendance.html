@@ -1,37 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" class="dark">
   <head>
     <title>attendance</title>
     <link rel="stylesheet" href="/static/output.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
-  <body>
-    <nav>
-      <div class="button">
-        <a href="/">Home</a>
+  <body class="bg-gray-100 dark:bg-black">
+    <nav class="w-full py-12">
+      <div class="flex gap-3 mx-auto w-fit h-full items-center justify-center">
+        <a href="/" class="button w-fit button-remove-shadow rounded-md">
+          <button href="/">{% include("icons/icon_home.html") %}</button>
+        </a>
+        <span
+          ><p class="font-sans font-bold text-2xl text-black dark:text-white">
+            Take Attendance
+          </p></span
+        >
       </div>
     </nav>
-    <div>
+    <div class="w-full flex flex-col items-center">
       {% if attendance_taken_or_not %}
-      <div><p>Attendance has already been taken today for {{stream_name}} stream of {{stream_class}}.</p></div>
+      <div>
+        <p class="text-black dark:text-white">
+          Attendance has already been taken today for {{ stream_name }} stream
+          of {{stream_class}}.
+        </p>
+      </div>
       {% else %}
-      <form method="POST">
-        {% for key, value in student_info.items() %}
-        <div>
-          <label>
-            {{ roll_number_from_id(key) }}<input
+
+      <form method="POST" class="">
+        <div class="grid grid-cols-AttendanceGrid gap-y-3">
+          {% for key, value in student_info.items() %}
+
+          <span class="flex justify-end grid-bg-common rounded-l-md"
+            ><p class="font-mono font-light text-gray-700 dark:text-gray-200">
+              {{ roll_number_from_id(key) }}
+            </p></span
+          >
+
+          <span class="grid-bg-common px-5">
+            <input
               type="checkbox"
-              name="{{ key }}"
+              class="rounded-3xl scale-110 accent-green-400 dark:accent-green-500"
+              name="{{ key
+              }}"
               value="{{ value }}" />
-            {{ value }}
-          </label>
+          </span>
+
+          <span class="flex items-center grid-bg-common rounded-r-md"
+            ><p
+              class="text-gray-900 tracking-wide dark:text-white font-sans text-lg font-semibold leading-none">
+              {{ value }}
+            </p></span
+          >
+
+          {% endfor %}
         </div>
-        {% endfor %}
-  
-        <button type="submit">Submit</button>
+        <div class="py-6">
+          <button type="submit" class="button">Submit</button>
+        </div>
       </form>
       {% endif %}
     </div>
-    
   </body>
 </html>
