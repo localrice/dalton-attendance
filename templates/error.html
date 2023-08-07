@@ -1,14 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en" class="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/output.css" />
     <title>DarL</title>
-</head>
-<body>
-    {% if title is defined %}
-    {{ title }}
-    {% endif %}
-    {{ message | safe}}
-</body>
+  </head>
+  <body class="bg-gray-100 dark:bg-black">
+    <nav class="py-12 w-full flex items-center justify-center">
+      <a class="w-fit button" href="/"
+        ><span>{% include("icons/icon_home.html") %}</span></a
+      >
+    </nav>
+
+    <main class="w-full flex flex-col items-center justify-center">
+      {% if title is defined %}
+      <div>
+        <p class="font-sans text-xl font-bold text-red-600">{{ title }}</p>
+      </div>
+
+      {% endif %}
+      <div>
+        <p class="font-sans text-gray-900 dark:text-red-50">
+          {{ message | safe }}
+        </p>
+      </div>
+    </main>
+  </body>
 </html>
