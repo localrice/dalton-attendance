@@ -10,7 +10,7 @@ from utils.list_string import list_to_string
 from api_routes import api_bp
 import requests
 from utils.fuzzy_search_db import fuzzy_search_names
-
+from utils.check_date_format import check_date_format
 # some configs
 DEBUG = True
 DATABASE = 'dalton.db'
@@ -89,9 +89,7 @@ def stream_attendance(stream_name):
                 list_to_string(absent_student_ids))
         cursor.execute(sql_insert, data)
         db.commit()
-        return render_template('attendance_taken.html', stream_name=stream_name, student_info=student_info,
-                               present_students=selected_id, absent_students=absent_student_ids,
-                               len=len, max=max, str=str)
+        return redirect(f'http://localhost:5000/attendance-records?date={date}&class={stream_class}&stream={stream_name}')
 
     attendance_taken_or_not = requests.get(
         f'http://localhost:5000/api/attendance-taken-or-not?stream={stream_name}&class={stream_class}').json()['attendance_taken']
@@ -209,6 +207,82 @@ def search():
         return render_template('students.html', list_of_info=list_of_info, id_attendance_count_list=id_attendance_count_list, enumerate=enumerate, round=round)
     elif student_id is not None and student_id.strip() == "":
         return render_template('error.html', message="ID is blank, pls provide a valid ID or return to <a href='/students'>Stdudents info</a>")
+
+
+@app.route('/attendance-records/',  methods=['POST', 'GET'])
+def attendance_records():
+    db = get_db()
+    cursor = db.cursor()
+    student_class = request.args.get('class')
+    student_stream = request.args.get('stream')
+    requested_date = request.args.get('date')
+    student_info_list = []
+    present_ids_dict = {}
+    absent_ids_dict = {}
+    if request.method == 'POST':
+        form_data = dict(request.form)
+        selected_class = form_data.get('class')
+        selected_stream = form_data.get('stream')
+        selected_date = form_data.get('date')
+    elif student_class != None or student_stream != None or requested_date != None:
+        selected_class = student_class
+        selected_stream = student_stream
+        selected_date = requested_date
+    else:
+        return render_template('attendance_records.html')
+
+    processed_date = datetime.strptime(
+        selected_date, check_date_format(selected_date)).strftime('%d-%m-%Y')
+
+    table_name = f'StudentInfo{selected_class}'
+
+    if selected_class != 'all-classes' and selected_stream != 'all-streams':
+        available_streams = [selected_stream]
+    elif selected_stream == 'all-streams':
+        available_streams = ['science', 'commerce', 'arts']
+    for stream in available_streams:
+        cursor.execute(
+            f'SELECT student_id FROM {table_name} WHERE stream = ?', (stream,))
+        results = cursor.fetchall()
+        student_id = [id[0] for id in results]
+        cursor.execute(
+            f'SELECT student_name FROM {table_name} WHERE stream = ?', (stream,))
+        results = cursor.fetchall()
+        student_names = [result[0] for result in results]
+        student_info = sort_dict_by_id(
+            dict(zip(student_id, student_names)))
+        student_info_list.append(student_info)
+        cursor.execute(
+            f'SELECT present FROM dailyAttendance WHERE date=? AND class=? AND stream=?', (processed_date, selected_class, stream,))
+        result = cursor.fetchall()
+        if len(result) == 0:
+            pass
+        else:
+            present_ids_dict[stream] = result[0][0].split(
+                ',')  # seperates each id from the tuple
+        cursor.execute(
+            f'SELECT absent FROM dailyAttendance WHERE date=? AND class=? AND stream=?', (processed_date, selected_class, stream,))
+        result = cursor.fetchall()
+        if len(result) == 0:
+            pass
+        else:
+            absent_ids_dict[stream] = result[0][0].split(
+                ',')   # seperates each id from the tuple
+    roll_number_dict = {}
+    for data_dict in [present_ids_dict, absent_ids_dict]:
+        for stream, ids in data_dict.items():
+            for student_id in ids:
+                api_url = f"http://127.0.0.1:5000/api/all-info?id={student_id}"
+                response = requests.get(api_url)
+                if response.status_code == 200:
+                    data = response.json()
+                    roll_number_dict[data['id']] = data['roll_no']
+    if len(roll_number_dict.keys()) == 0:
+        return render_template('error.html',message="No records found for the specified date, stream and class.")
+    return render_template('attendance_records.html', student_info=student_info_list, present_students=present_ids_dict,
+                           absent_students=absent_ids_dict, show_table=True, len=len, max=max, str=str, range=range,
+                           enumerate=enumerate, next=next, iter=iter, list=list, date=processed_date, available_streams=available_streams,
+                            roll_number_dict=roll_number_dict, round=round)
 
 
 extra_dirs = ['./templates/',]
