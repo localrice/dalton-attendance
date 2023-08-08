@@ -9,6 +9,7 @@ module.exports = {
     extend: {
       gridTemplateColumns: {
         AttendanceGrid: 'auto auto auto',
+        RecordsGrid: 'auto auto',
         StudentCards: 'repeat(auto-fit, minmax(350px, 1fr))',
       },
       keyframes: {
