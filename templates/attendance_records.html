@@ -1,64 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/output.css" />
+    <title>DarL</title>
+  </head>
+  <body class="bg-gray-100 dark:bg-black">
+    <div>
+      <div class="w-full flex gap-3 py-7 items-center justify-center">
+        <a href="/">
+          <span class="button w-fit button-remove-shadow">
+            {% include("icons/icon_home.html") %}
+          </span>
+        </a>
+        <p class="font-sans font-bold text-xl text-black dark:text-white">
+          Check Records
+        </p>
+      </div>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dar</title>
-</head>
+      <form
+        class="w-full flex gap-3 flex-col items-center justify-center"
+        action="/attendance-records"
+        method="POST">
+        <fieldset
+          class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-center">
+          <select id="class" name="class" requried class="input-select">
+            <option value="11">11</option>
+            <option value="12">12</option>
+          </select>
+          <select id="stream" name="stream" requried class="input-select">
+            <option value="all-streams">all streams</option>
+            <option value="science">science</option>
+            <option value="commerce">commerce</option>
+            <option value="arts">arts</option>
+          </select>
+          <input
+            type="date"
+            name="date"
+            id="date"
+            class="border border-gray-400 dark:bg-gray-950 dark:text-white dark:border-gray-800 py-[0.2rem] px-[.15rem] rounded-md bg"
+            required />
+        </fieldset>
+        <button
+          type="submit"
+          value="Submit"
+          class="button button-remove-shadow w-fit">
+          Check
+        </button>
+      </form>
+    </div>
 
-<body>
-  <form action="/attendance-records" method="POST">
-    <select id="class" name="class" requried>
-      <option value="11">11</option>
-      <option value="12">12</option>
-    </select>
-    <select id="stream" name="stream" requried>
-      <option value="all-streams">all streams</option>
-      <option value="science">science</option>
-      <option value="commerce">commerce</option>
-      <option value="arts">arts</option>
-    </select>
-    <input type="date" name="date" id="date" required />
-    <input type="submit" value="Submit" />
-  </form>
-  
-  {% if show_table == True %}
-      {{date}}<br>
-      {% for stream in available_streams %}
-            <div>
-            <h2>{{stream}} stream</h2>
-            {% if present_students[stream] %}
-                <div>
-                  <h3>present:</h3>
-                  {% for id in present_students[stream] %}
-                      {{ roll_number_dict[id] }}.{{student_info[available_streams.index(stream)][id]}}
-                  {% endfor %}
-                </div>
-                <div>
-                  <h3>absent:</h3>
-                  {% for id in absent_students[stream] %}
-                      {{roll_number_dict[id]}}.{{student_info[available_streams.index(stream)][id]}}
-                  {% endfor %}
-                </div>
-            {% else %}
-                <p><h3>attendance hasn't been taken yet </h3></p>
-            {% endif %}
-            {% if len(present_students[stream]) == 0 and len(absent_students[stream]) == 0 %}
-              
-            {% else %}
-            <div>
-              {{ round(len(present_students[stream]) / (len(present_students[stream]) +len(absent_students[stream])) *100) }} % students present from {{stream}}
-            </div>
-            {% endif %}
-          
+    {% if show_table %}
+
+    <div class="w-full flex py-8 items-center justify-end">
+      <p class="font-sans font-semibold px-12 text-black dark:text-gray-200">
+        Attendance record for : {{ date }}
+      </p>
+    </div>
+
+    {% for stream in available_streams %}
+    <div class="w-full my-12">
+      <div class="flex mx-auto capitalize justify-start w-full max-w-2xl">
+        <h2 class="text-black dark:text-gray-200">{{stream}} stream</h2>
+      </div>
+      <div class="border border-gray-600 max-w-2xl mx-auto py-4 px-2">
+        {% if present_students[stream] %}
+        <div
+          class="w-full items-center justify-center rounded-sm max-w-lg mx-auto">
+          <div class="flex w-full justify-center mb-2">
+            <h3 class="text-black dark:text-gray-200">Students present</h3>
           </div>
-      {% endfor %}
-  {% else %}
-  {% endif %}
+          <div class="gap-y-1 grid grid-cols-RecordsGrid">
+            {% for id in present_students[stream] %}
 
+            <span class="bg-green-500 flex justify-end pr-4 py-1 rounded-l">
+              {{ roll_number_dict[id] }}
+            </span>
+            <span class="bg-green-500 py-1 rounded-r capitalize">
+              {{student_info[available_streams.index(stream)][id]}}
+            </span>
+            {% endfor %}
+          </div>
+        </div>
 
-  
-</body>
+        <div
+          class="w-full mt-5 items-center justify-center rounded-sm max-w-lg mx-auto">
+          <div class="flex w-full justify-center my-2">
+            <h3 class="text-black dark:text-gray-200">Students absent</h3>
+          </div>
+          <div class="gap-y-1 grid grid-cols-RecordsGrid">
+            {% for id in absent_students[stream] %}
+            <span class="bg-red-500 flex justify-end pr-4 py-1 rounded-l">
+              {{ roll_number_dict[id] }}
+            </span>
+            <span class="bg-red-500 py-1 rounded-r">
+              {{student_info[available_streams.index(stream)][id]}}
+            </span>
+            {% endfor %}
+          </div>
+        </div>
 
+        {% else %}
+        <div class="w-full">
+          <h3
+            class="mx-auto w-fit font-sans text-red-500 dark:text-red-400 font-semibold">
+            attendance hasn&apos;t been taken yet.
+          </h3>
+        </div>
+
+        {% endif %} {% if len(present_students[stream]) == 0 and
+        len(absent_students[stream]) == 0 %} {% else %}
+        <div class="w-full mt-4">
+          <p class="w-fit mx-auto text-black dark:text-gray-100">
+            <span class="font-semibold">
+              {{ round(len(present_students[stream]) /
+              (len(present_students[stream]) +len(absent_students[stream]))
+              *100) }}%
+            </span>
+            students were present on
+            <span class="font-semibold"> {{ date }} </span>
+            from
+            <span class="font-semibold"> {{ stream }} </span> stream.
+          </p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %} {% else %} {% endif %}
+  </body>
 </html>
