@@ -30,4 +30,8 @@ input[type='number'] {
   .grid-bg-common {
     @apply bg-gray-200 dark:bg-gray-200/10 py-[.4rem] px-3;
   }
+
+  .input-select {
+    @apply px-1 py-1 bg-white border border-gray-400 outline-none dark:bg-gray-950 dark:border-gray-800 dark:text-white rounded-md;
+  }
 }
